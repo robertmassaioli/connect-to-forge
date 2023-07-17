@@ -21,7 +21,7 @@ interface ForgeManifest {
   app: {
     connect: {
       key: string;
-      authentication: string;
+      authentication?: string;
       remote: string;
     };
   };
@@ -60,7 +60,6 @@ function convertToForgeManifest(connect: ConnectDescriptor, type: 'jira' | 'conf
     app: {
       connect: {
         key: connect.key,
-        authentication: 'jwt',
         remote: 'connect'
       }
     },
@@ -86,6 +85,7 @@ function convertToForgeManifest(connect: ConnectDescriptor, type: 'jira' | 'conf
     const moduleName = `${type}:lifecycle`;
     manifest.connectModules[moduleName] = { key: 'lifecycle-events', ...connect.lifecycle };
     console.log(` - Moved all lifecycle events into connectModules.${moduleName}.`);
+    manifest.app.connect.authentication = 'jwt';
   }
 
   // Add modules
