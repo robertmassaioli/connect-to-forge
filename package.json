@@ -14,6 +14,6 @@
     "ts-is-present": "^1.2.2"
   },
   "scripts": {
-    "start": "ts-node --esm src/index.ts --type confluence --url"
+    "start": "ts-node --esm src/index.ts"
   }
 }
