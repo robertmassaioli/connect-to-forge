@@ -1,0 +1,19 @@
+{
+  "devDependencies": {
+    "@types/inquirer": "^9.0.3",
+    "@types/js-yaml": "^4.0.5",
+    "@types/node": "^20.4.2",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "axios": "^1.4.0",
+    "commander": "^11.0.0",
+    "inquirer": "^8.2.4",
+    "js-yaml": "^4.1.0",
+    "ts-is-present": "^1.2.2"
+  },
+  "scripts": {
+    "start": "ts-node --esm src/index.ts --type confluence --url https://marketplace-cdn.atlassian.com/files/1.0.9-AC/f6a07321-b8c8-4152-a7fe-2a5c8da40f74"
+  }
+}

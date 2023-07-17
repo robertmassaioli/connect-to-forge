@@ -1,0 +1,4726 @@
+asapIssuers:
+  - jswdd-semantic-test
+  - micros/oauth2-consent
+  - micros-group/jswdd
+  - micros/caas-extension-types
+  - micros/pf-directory-service
+  - micros-group/jira
+  - micros/jira
+  - synthetic-checks
+  - micros/jswdd-processor
+  - micros/hudson
+  - platform-testing
+  - micros/jira-dw-workflow
+  - micros/jira-demux-service
+  - micros/xen-lifecycle-service
+  - micros/jsd-parachute
+moduleTypes:
+  connect-jira:keyboardShortcuts:
+    schema:
+      properties:
+        shortcut:
+          pattern: '[a-z]{1,3}'
+          maxLength: 3
+          type: string
+          fieldDescription: |+
+
+
+            The shortcut sequence. The current limitations are
+
+             <ul>
+                 <li>the sequence cannot shadow an existing product shortcut</li>
+                 <li>can only contain lowercase letters</li>
+                 <li>has to be shorter than 4 characters</li>
+             </ul>
+
+        context:
+          enum:
+            - global
+            - GLOBAL
+            - issue_navigation
+            - ISSUE_NAVIGATION
+            - issue_action
+            - ISSUE_ACTION
+            - agile_board
+            - AGILE_BOARD
+          type: string
+          fieldDescription: >+
+
+
+            The context in which the shortcut will be available. This is
+            optional, if not given the shortcut is assumed to be global.
+             Different products define different contexts.
+
+             Jira supported contexts:
+             <ul>
+                 <li>global</li>
+                 <li>issue&#95;navigation</li>
+                 <li>issue&#95;action</li>
+                 <li>agile&#95;board</li>
+             </ul>
+
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        target:
+          properties:
+            key:
+              pattern: ^[a-zA-Z0-9-]+$
+              maxLength: 1000
+              type: string
+              fieldDescription: |+
+
+
+                The key of the target module, defined in the add-on descriptor.
+
+          required:
+            - key
+          shortClassName: keyboardShortcutTargetBean
+          type: object
+          title: Keyboard Shortcut Target
+          description: |+
+
+
+            The bean containing the key of the target module of the shortcut.
+
+          fieldDescription: |+
+
+
+            The target must be the key of another module defined by the add-on.
+
+             Below are the actions which will be executed by the shortcut depending on the module type of the target.
+
+             <ul>
+              <li>General Page: Navigates to the general page</li>
+              <li>Dialog: Opens the dialog</li>
+              <li>Web Item: Emulates clicking on the web item, which must be present on the current page</li>
+             </ul>
+
+      definitions:
+        i18nProperty: &ref_0
+          properties:
+            value:
+              maxLength: 1500
+              type: string
+              fieldDescription: >+
+
+
+                The human-readable default value. This will be used if no
+                translation exists.
+                 Only the following HTML tags are supported: `b`, `i`, `strong`, `em`, and `code`.
+
+            i18n:
+              maxLength: 300
+              type: string
+              fieldDescription: |+
+
+
+                The localization key for the human-readable value.
+                 <a href="../../internationalization/">Translations</a> for the keys are defined at the top level of the
+                 <a href="../../add-on-descriptor/">add-on descriptor</a>.
+
+          required:
+            - value
+          shortClassName: i18nProperty
+          type: object
+          title: i18n Property
+          description: >+
+
+
+            Represents a string that can be resolved via a localization
+            properties file. You can use the same `i18n Property` key
+             and value in multiple places if you like, but identical keys must have identical values.
+
+             <h3>Example</h3>
+
+
+
+
+
+                {
+                  "value": "My text"
+                }
+
+
+    tags:
+      - forge
+  connect-jira:adminPages:
+    schema:
+      properties: &ref_5
+        icon:
+          $ref: '#/definitions/icon'
+          fieldDescription: >+
+
+
+            An optional icon to display with the link text or as the link,
+            specified by URL to its hosted location.
+              You can specify a particular width and height for the icon. Most link icons in Atlassian applications
+              are 16 by 16 pixels.
+
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        weight:
+          type: integer
+          fieldDescription: >+
+
+
+            Determines the order in which the page's link appears in the menu or
+            list.
+
+             The "lightest" weight (i.e., lowest number) appears first, rising relative to other items,
+             while the "heaviest" weights sink to the bottom of the menu or list.
+
+             Built-in web items have weights that are incremented by numbers that leave room for additional
+             items, such as by 10 or 100. Be mindful of the weight you choose for your item, so that it appears
+             in a sensible order given existing items.
+
+          defaultValue: '100'
+        fullPage:
+          type: boolean
+          fieldDescription: >+
+
+
+            Allows the add-on to explicitly request any product-added header,
+            margins or padding be removed.
+             Currently only takes affect on:
+             <ul>
+                 <li>Confluence Admin Pages</li>
+                 <li>Confluence Configure Pages</li>
+             </ul>
+
+          defaultValue: 'false'
+        cacheable:
+          type: boolean
+          fieldDescription: >+
+
+
+            Returns whether the URL should be cacheable. Cacheable URLs are
+            taken directly from the add-on descriptor, and
+             lack all additional query parameters:
+             <ul>
+                 <li>standard iframe query parameters</li>
+                 <li>product context parameters</li>
+                 <li>JWT token</li>
+             </ul>
+
+          defaultValue: 'false'
+        location:
+          maxLength: 100
+          type: string
+          fieldDescription: >+
+
+
+            The location in the application interface where the page's link
+            should appear. For the Atlassian application
+             interface, a location is something like the coordinates on a map. It points to a particular drop-down menu or
+             navigation list in the UI.
+
+             Places in the Atlassian UI are identified by what are known as "well-known locations."
+             For example, the "system.admin/globalsettings" location is in the administrative
+             menu link on the left side of the Administration Console.
+
+             Find product locations with the web fragment finder:
+
+             <ul>
+              <li><a href="https://marketplace.atlassian.com/plugins/com.wittified.webfragment-finder/cloud/overview">Jira Locations</a></li>
+              <li><a href="https://marketplace.atlassian.com/plugins/com.wittified.webfragment-finder-confluence/cloud/overview">Confluence locations</a></li>
+             </ul>
+
+             If the <code>location</code> property is not specified, a default location is used:
+
+             Jira:
+
+             <ul>
+             <li><code>generalPage</code>: system.top.navigation.bar</li>
+             <li><code>adminPage</code>: advanced\_menu\_section/advanced_section</li>
+             </ul>
+
+             Confluence:
+
+             <ul>
+             <li><code>generalPage</code>: system.help/pages</li>
+             <li><code>adminPage</code>: system.admin/marketplace_confluence</li>
+             </ul>
+
+             You may wish to have no link to the page shown anywhere - for example, if you are using the page as the
+             target of a <a href="../../jsapi/dialog/">JavaScript API dialog</a>.
+             In this case, set the value of <code>location</code> to "none".
+
+        conditions:
+          items:
+            type: object
+            anyOf:
+              - $ref: '#/definitions/singleCondition'
+              - $ref: '#/definitions/compositeCondition'
+          type: array
+          fieldDescription: >+
+
+
+            Conditions can be added to display only when all the given
+            conditions are true.
+
+
+            The supported conditions for pages are:
+
+
+            <strong>Common conditions</strong>
+
+
+            <ul>
+                <li><code>addon_property_exists</code></li>
+                <li><code>addon_property_equal_to</code></li>
+                <li><code>addon_property_equal_to_context</code></li>
+                <li><code>addon_property_contains_any</code></li>
+                <li><code>addon_property_contains_all</code></li>
+                <li><code>addon_property_contains_context</code></li>
+                <li><code>addon_property_contains_any_user_group</code></li>
+                <li><code>user_is_admin</code></li>
+                <li><code>user_is_logged_in</code></li>
+                <li><code>user_is_sysadmin</code></li>
+                <li><code>addon_is_licensed</code></li>
+                <li><code>feature_flag</code></li>
+            </ul>
+
+
+            <strong>Jira conditions</strong>
+
+
+            <ul>
+                <li><code>entity_property_exists</code></li>
+                <li><code>entity_property_equal_to</code></li>
+                <li><code>entity_property_equal_to_context</code></li>
+                <li><code>entity_property_contains_any</code></li>
+                <li><code>entity_property_contains_all</code></li>
+                <li><code>entity_property_contains_context</code></li>
+                <li><code>entity_property_contains_any_user_group</code></li>
+                <li><code>can_use_application</code></li>
+                <li><code>project_type</code></li>
+                <li><code>has_global_permission</code></li>
+            </ul>
+
+
+            <strong>Confluence conditions</strong>
+
+
+            <ul>
+                <li><code>content_property_exists</code></li>
+                <li><code>content_property_equal_to</code></li>
+                <li><code>content_property_equal_to_context</code></li>
+                <li><code>content_property_contains_any</code></li>
+                <li><code>content_property_contains_all</code></li>
+                <li><code>content_property_contains_context</code></li>
+                <li><code>content_property_contains_any_user_group</code></li>
+                <li><code>space_property_exists</code></li>
+                <li><code>space_property_equal_to</code></li>
+                <li><code>space_property_equal_to_context</code></li>
+                <li><code>space_property_contains_any</code></li>
+                <li><code>space_property_contains_all</code></li>
+                <li><code>space_property_contains_context</code></li>
+                <li><code>space_property_contains_any_user_group</code></li>
+            </ul>
+
+        params:
+          additionalProperties: true
+          type: object
+          fieldTitle: Object
+          fieldDescription: >+
+
+
+            This object represents a map of key/value pairs, where each property
+            name and value corresponds to the parameter name and value
+            respectively.
+
+             <p><b>Example</b></p>
+
+
+
+
+
+                {
+                  "params": {
+                    "someOtherProperty": "someValue",
+                    "myCustomProperty": "myValue"
+                  }
+                }
+
+
+        url:
+          format: uri
+          type: string
+          fieldDescription: |+
+
+
+            The url to retrieve the content from.
+             This must be relative to the add-on's baseUrl.
+
+      definitions:
+        icon: &ref_3
+          properties:
+            width:
+              type: integer
+              fieldDescription: |+
+
+
+                The width in pixels of the icon image.
+
+            url:
+              format: uri
+              type: string
+              fieldDescription: >+
+
+
+                The URL of the icon. Your icon needs to be hosted remotely at a
+                web-accessible location. You can specify the
+                 URL as an absolute URL or relative to the add-on's base URL.
+
+            height:
+              type: integer
+              fieldDescription: |+
+
+
+                The height in pixels of the icon image.
+
+          required:
+            - url
+          shortClassName: iconBean
+          type: object
+          title: Icon
+          description: |+
+
+
+            Defines an icon to display.
+
+             <h3>Example</h3>
+
+
+
+
+
+                {
+                  "icon": {
+                    "width": 16,
+                    "height": 16,
+                    "url": "/my-icon.png"
+                  }
+                }
+
+
+        i18nProperty: *ref_0
+        singleCondition: &ref_1
+          properties:
+            condition:
+              maxLength: 100
+              type: string
+              fieldDescription: |+
+
+
+                A string indicating the name of the condition
+
+            invert:
+              type: boolean
+              fieldDescription: >+
+
+
+                A flag indicating whether to invert the boolean result of the
+                condition.
+
+              defaultValue: 'false'
+            params:
+              additionalProperties: true
+              type: object
+              fieldTitle: Object
+              fieldDescription: >+
+
+
+                This object represents a map of key/value pairs, where each
+                property name and value corresponds to the parameter name and
+                value respectively.
+
+                 <p><b>Example</b></p>
+
+
+
+
+
+                    {
+                      "params": {
+                        "someOtherProperty": "someValue",
+                        "myCustomProperty": "myValue"
+                      }
+                    }
+
+
+          required:
+            - condition
+          shortClassName: singleConditionBean
+          type: object
+          title: Single Condition
+          description: >+
+
+
+            Single Conditions are either provided by the host application. See
+            the complete documentation of
+             [Conditions](../../conditions/) for more information.
+
+             To invert a condition, add the attribute ``invert="true"`` to the condition element.
+             This is useful where you want to show the section if a certain condition is not satisfied.
+
+             <h3>Example</h3>
+
+
+
+
+
+                {
+                  "condition": "user_is_logged_in",
+                  "invert": false
+                }
+
+
+        compositeCondition: &ref_2
+          properties:
+            conditions:
+              items:
+                type: object
+                anyOf:
+                  - $ref: '#/definitions/singleCondition'
+                  - $ref: '#'
+              type: array
+              fieldDescription: |+
+
+
+                The conditions to compose using the specific logical operator.
+
+            type:
+              enum:
+                - and
+                - AND
+                - or
+                - OR
+              type: string
+              fieldDescription: >+
+
+
+                Defines what logical operator is used to evaluate its collection
+                of condition elements.
+
+          shortClassName: compositeConditionBean
+          type: object
+          title: Composite Condition
+          description: >+
+
+
+            Composite Conditions are composed of a collection of [Single
+            Condition](../single-condition/) / Composite Conditions
+             and a type attribute.
+
+             <h3>Example</h3>
+
+
+
+
+
+                {
+                  "conditions": [
+                    {
+                      "or": [
+                        {
+                          "condition": "can_attach_file_to_issue",
+                          "invert": false
+                        },
+                        {
+                          "condition": "is_issue_assigned_to_current_user",
+                          "invert": false
+                        }
+                      ]
+                    },
+                    {
+                      "condition": "user_is_logged_in",
+                      "invert": false
+                    }
+                  ]
+                }
+
+
+    tags:
+      - forge
+  connect-jira:webPanels:
+    schema:
+      properties:
+        layout:
+          $ref: '#/definitions/webPanelLayout'
+          fieldDescription: |+
+
+
+            The width and height of the web panel on the page.
+
+        tooltip:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: >+
+
+
+            Information about the web panel that will be shown when hovering
+            over its header
+
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        weight:
+          type: integer
+          fieldDescription: >+
+
+
+            Determines the order in which web panels appear. Web panels are
+            displayed top to bottom or left to right in order
+             of ascending weight. The "lightest" weight is displayed first, while the "heaviest" weights sink to the bottom.
+             The weight values for most panels start from 100, and the weights for the links generally start from 10. The
+             weight is incremented by 10 for each in sequence to leave room for custom panels.
+
+        location:
+          maxLength: 100
+          type: string
+          fieldDescription: |+
+
+
+            <p>Location in the application interface for this panel.</p>
+
+             Find product locations with the Web Fragment Finder
+
+             <ul>
+                 <li><a href="https://marketplace.atlassian.com/plugins/com.wittified.webfragment-finder/cloud/overview">Jira Locations</a></li>
+                 <li><a href="https://marketplace.atlassian.com/plugins/com.wittified.webfragment-finder-confluence/cloud/overview">Confluence locations</a></li>
+             </ul>
+
+        cacheable:
+          type: boolean
+          fieldDescription: >+
+
+
+            Returns whether the URL should be cacheable. Cacheable URLs are
+            taken directly from the add-on descriptor, and
+             lack all additional query parameters:
+             <ul>
+                 <li>standard iframe query parameters</li>
+                 <li>product context parameters</li>
+                 <li>JWT token</li>
+             </ul>
+
+          defaultValue: 'false'
+        supportsNative:
+          type: boolean
+          fieldDescription: >+
+
+
+            Specifies whether the web panel will be shown in the native apps. As
+            of now, this will only support the Jira
+             mobile and desktop clients. The web panel is required to have <code>atl.jira.view.issue.right.context</code> or
+             <code>atl.jira.view.issue.left.context</code> as the location.
+
+             Web panels with the <code>atl.jira.view.issue.right.context</code> location will be shown in Jira for iOS/Mac
+             version 109 or later and Jira for Android version 55 or later.
+
+             Web panels with the <code>atl.jira.view.issue.left.context</code> location will be shown in  Jira for Android
+             version 63 or later. It is not yet available in Jira for iOS/Mac but we will update this documentation when it is.
+             
+             Read about [enabling your addon for the Jira mobile and desktop clients](/cloud/jira/platform/developing-apps-for-jira-cloud-mobile/).
+
+          defaultValue: 'false'
+        conditions:
+          items:
+            type: object
+            anyOf:
+              - $ref: '#/definitions/singleCondition'
+              - $ref: '#/definitions/compositeCondition'
+          type: array
+          fieldDescription: >+
+
+
+            <a href="../../conditions/">Conditions</a> can be added to display
+            only when all the given conditions are true.
+
+        params:
+          additionalProperties: true
+          type: object
+          fieldTitle: Object
+          fieldDescription: >+
+
+
+            This object represents a map of key/value pairs, where each property
+            name and value corresponds to the parameter name and value
+            respectively.
+
+             <p><b>Example</b></p>
+
+
+
+
+
+                {
+                  "params": {
+                    "someOtherProperty": "someValue",
+                    "myCustomProperty": "myValue"
+                  }
+                }
+
+
+        url:
+          format: uri
+          type: string
+          fieldDescription: >+
+
+
+            The URL of the add-on resource that provides the web panel content.
+            This URL must be relative to the add-on's 
+             baseUrl and can use <a href="../../context-parameters/">context parameters</a>.
+
+      definitions:
+        webPanelLayout:
+          properties:
+            width:
+              maxLength: 10
+              type: string
+              fieldDescription: |+
+
+
+            height:
+              maxLength: 10
+              type: string
+              fieldDescription: |+
+
+
+          shortClassName: webPanelLayout
+          type: object
+          title: Web Panel Layout
+          description: |+
+
+
+            <h3>Example</h3>
+
+
+
+
+
+                {
+                  "layout": {
+                    "width": "100",
+                    "height": "200"
+                  }
+                }
+
+
+        i18nProperty: *ref_0
+        singleCondition: *ref_1
+        compositeCondition: *ref_2
+    tags:
+      - forge
+  connect-jira:webhooks:
+    schema:
+      properties:
+        filter:
+          maxLength: 10000
+          type: string
+          fieldDescription: >+
+
+
+            Filter for entities that the webhook will be triggered for. Refer to
+            the documentation on <a href="#Filtering">filtering</a> for details.
+
+        excludeBody:
+          type: boolean
+          fieldDescription: >+
+
+
+            Specifies if webhook will send JSON body when triggered. By default,
+            a webhook will send a request with a JSON body.
+
+          defaultValue: 'false'
+        event:
+          maxLength: 100
+          type: string
+          fieldDescription: >+
+
+
+            Specifies the named event you would like to listen to (e.g.,
+            "enabled", "jira:issue\_created", etc.)
+
+        conditions:
+          items:
+            type: object
+            anyOf:
+              - $ref: '#/definitions/compositeCondition'
+              - $ref: '#/definitions/singleCondition'
+          type: array
+          fieldDescription: |+
+
+
+            List of conditions which must be true for the webhook to fire
+
+        propertyKeys:
+          items:
+            type: string
+          type: array
+          fieldDescription: >+
+
+
+            Specifies entity properties which will be returned inside JSON body.
+            If not specified no properties will be returned.
+
+             Currently this is supported only in Jira webhooks, for all events that support <a href="/cloud/jira/platform/jira-entity-properties/">Entity Properties</a>.
+             Note that properties won't be returned for entity-deleted events, since the properties are already deleted by the time the webhook is sent.
+
+        url:
+          type: string
+          fieldDescription: >+
+
+
+            Specifies your add-on's POST webhook handler URL. This property must
+            be a URL relative to the add-on's baseUrl.
+
+      definitions:
+        compositeCondition: *ref_2
+        singleCondition: *ref_1
+    tags:
+      - forge
+  connect-jira:postInstallPage:
+    schema:
+      properties: &ref_4
+        icon:
+          $ref: '#/definitions/icon'
+          fieldDescription: >+
+
+
+            An optional icon to display with the link text or as the link,
+            specified by URL to its hosted location.
+              You can specify a particular width and height for the icon. Most link icons in Atlassian applications
+              are 16 by 16 pixels.
+
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        weight:
+          type: integer
+          fieldDescription: >+
+
+
+            Determines the order in which the page's link appears in the menu or
+            list.
+
+             The "lightest" weight (i.e., lowest number) appears first, rising relative to other items,
+             while the "heaviest" weights sink to the bottom of the menu or list.
+
+             Built-in web items have weights that are incremented by numbers that leave room for additional
+             items, such as by 10 or 100. Be mindful of the weight you choose for your item, so that it appears
+             in a sensible order given existing items.
+
+          defaultValue: '100'
+        cacheable:
+          type: boolean
+          fieldDescription: >+
+
+
+            Returns whether the URL should be cacheable. Cacheable URLs are
+            taken directly from the add-on descriptor, and
+             lack all additional query parameters:
+             <ul>
+                 <li>standard iframe query parameters</li>
+                 <li>product context parameters</li>
+                 <li>JWT token</li>
+             </ul>
+
+          defaultValue: 'false'
+        location:
+          maxLength: 100
+          type: string
+          fieldDescription: >+
+
+
+            The location in the application interface where the page's link
+            should appear. For the Atlassian application
+             interface, a location is something like the coordinates on a map. It points to a particular drop-down menu or
+             navigation list in the UI.
+
+             Places in the Atlassian UI are identified by what are known as "well-known locations."
+             For example, the "system.admin/globalsettings" location is in the administrative
+             menu link on the left side of the Administration Console.
+
+             Find product locations with the web fragment finder:
+
+             <ul>
+              <li><a href="https://marketplace.atlassian.com/plugins/com.wittified.webfragment-finder/cloud/overview">Jira Locations</a></li>
+              <li><a href="https://marketplace.atlassian.com/plugins/com.wittified.webfragment-finder-confluence/cloud/overview">Confluence locations</a></li>
+             </ul>
+
+             If the <code>location</code> property is not specified, a default location is used:
+
+             Jira:
+
+             <ul>
+             <li><code>generalPage</code>: system.top.navigation.bar</li>
+             <li><code>adminPage</code>: advanced\_menu\_section/advanced_section</li>
+             </ul>
+
+             Confluence:
+
+             <ul>
+             <li><code>generalPage</code>: system.help/pages</li>
+             <li><code>adminPage</code>: system.admin/marketplace_confluence</li>
+             </ul>
+
+             You may wish to have no link to the page shown anywhere - for example, if you are using the page as the
+             target of a <a href="../../jsapi/dialog/">JavaScript API dialog</a>.
+             In this case, set the value of <code>location</code> to "none".
+
+        conditions:
+          items:
+            type: object
+            anyOf:
+              - $ref: '#/definitions/compositeCondition'
+              - $ref: '#/definitions/singleCondition'
+          type: array
+          fieldDescription: >+
+
+
+            Conditions can be added to display only when all the given
+            conditions are true.
+
+
+            The supported conditions for pages are:
+
+
+            <strong>Common conditions</strong>
+
+
+            <ul>
+                <li><code>addon_property_exists</code></li>
+                <li><code>addon_property_equal_to</code></li>
+                <li><code>addon_property_equal_to_context</code></li>
+                <li><code>addon_property_contains_any</code></li>
+                <li><code>addon_property_contains_all</code></li>
+                <li><code>addon_property_contains_context</code></li>
+                <li><code>addon_property_contains_any_user_group</code></li>
+                <li><code>user_is_admin</code></li>
+                <li><code>user_is_logged_in</code></li>
+                <li><code>user_is_sysadmin</code></li>
+                <li><code>addon_is_licensed</code></li>
+                <li><code>feature_flag</code></li>
+            </ul>
+
+
+            <strong>Jira conditions</strong>
+
+
+            <ul>
+                <li><code>entity_property_exists</code></li>
+                <li><code>entity_property_equal_to</code></li>
+                <li><code>entity_property_equal_to_context</code></li>
+                <li><code>entity_property_contains_any</code></li>
+                <li><code>entity_property_contains_all</code></li>
+                <li><code>entity_property_contains_context</code></li>
+                <li><code>entity_property_contains_any_user_group</code></li>
+                <li><code>can_use_application</code></li>
+                <li><code>project_type</code></li>
+                <li><code>has_global_permission</code></li>
+            </ul>
+
+
+            <strong>Confluence conditions</strong>
+
+
+            <ul>
+                <li><code>content_property_exists</code></li>
+                <li><code>content_property_equal_to</code></li>
+                <li><code>content_property_equal_to_context</code></li>
+                <li><code>content_property_contains_any</code></li>
+                <li><code>content_property_contains_all</code></li>
+                <li><code>content_property_contains_context</code></li>
+                <li><code>content_property_contains_any_user_group</code></li>
+                <li><code>space_property_exists</code></li>
+                <li><code>space_property_equal_to</code></li>
+                <li><code>space_property_equal_to_context</code></li>
+                <li><code>space_property_contains_any</code></li>
+                <li><code>space_property_contains_all</code></li>
+                <li><code>space_property_contains_context</code></li>
+                <li><code>space_property_contains_any_user_group</code></li>
+            </ul>
+
+        params:
+          additionalProperties: true
+          type: object
+          fieldTitle: Object
+          fieldDescription: >+
+
+
+            This object represents a map of key/value pairs, where each property
+            name and value corresponds to the parameter name and value
+            respectively.
+
+             <p><b>Example</b></p>
+
+
+
+
+
+                {
+                  "params": {
+                    "someOtherProperty": "someValue",
+                    "myCustomProperty": "myValue"
+                  }
+                }
+
+
+        url:
+          format: uri
+          type: string
+          fieldDescription: |+
+
+
+            The url to retrieve the content from.
+             This must be relative to the add-on's baseUrl.
+
+      definitions:
+        icon: *ref_3
+        i18nProperty: *ref_0
+        compositeCondition: *ref_2
+        singleCondition: *ref_1
+    tags:
+      - forge
+  connect-jira:webSections:
+    schema:
+      properties:
+        tooltip:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            The internationalised text to be used in the link's tooltip.
+
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        weight:
+          type: integer
+          fieldDescription: >+
+
+
+            <p>Determines the order in which the web section appears in the menu
+            or list.</p>
+
+             <p>The "lightest" weight (i.e., lowest number) appears first, rising relative to other items, while the "heaviest"
+             weights sink to the bottom of the menu or list.</p>
+
+             <p>Built-in web sections have weights that are incremented by numbers that leave room for additional sections, such
+             as by 10 or 100. Be mindful of the weight you choose for your item, so that it appears in a sensible order given
+             existing items.</p>
+
+          defaultValue: '100'
+        location:
+          maxLength: 100
+          type: string
+          fieldDescription: >+
+
+
+            The location in the application interface where the web section
+            should appear. For the Atlassian application
+             interface, a location is something like the coordinates on a map. It points to a particular drop-down menu or
+             navigation list in the UI.
+
+             Find product locations with the Web Fragment Finder
+
+             <ul>
+                 <li><a href="https://marketplace.atlassian.com/plugins/com.wittified.webfragment-finder/cloud/overview">Jira Locations</a></li>
+                 <li><a href="https://marketplace.atlassian.com/plugins/com.wittified.webfragment-finder-confluence/cloud/overview">Confluence locations</a></li>
+             </ul>
+
+        conditions:
+          items:
+            type: object
+            anyOf:
+              - $ref: '#/definitions/compositeCondition'
+              - $ref: '#/definitions/singleCondition'
+          type: array
+          fieldDescription: >+
+
+
+            <a href="../../conditions/">Conditions</a> can be added to display
+            only when all the given conditions are true.
+
+        params:
+          additionalProperties: true
+          type: object
+          fieldTitle: Object
+          fieldDescription: >+
+
+
+            This object represents a map of key/value pairs, where each property
+            name and value corresponds to the parameter name and value
+            respectively.
+
+             <p><b>Example</b></p>
+
+
+
+
+
+                {
+                  "params": {
+                    "someOtherProperty": "someValue",
+                    "myCustomProperty": "myValue"
+                  }
+                }
+
+
+      definitions:
+        i18nProperty: *ref_0
+        compositeCondition: *ref_2
+        singleCondition: *ref_1
+    tags:
+      - forge
+  connect-jira:generalPages:
+    schema:
+      properties: *ref_4
+      definitions:
+        icon: *ref_3
+        i18nProperty: *ref_0
+        compositeCondition: *ref_2
+        singleCondition: *ref_1
+    tags:
+      - forge
+  connect-jira:webItems:
+    schema:
+      properties:
+        styleClasses:
+          items:
+            pattern: ^[_a-zA-Z]+[_a-zA-Z0-9-]*$
+            maxLength: 1000
+            type: string
+          type: array
+          fieldDescription: >+
+
+
+            Specifies custom styles for the web item target page, if desired. By
+            default, the web item content gets
+             styled in the default style of the target application.
+             It must only contain alphanumeric characters, dashes, underscores
+             and must only start with alpha characters or underscores.
+
+        tooltip:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            The internationalised text to be used in the link's tooltip.
+
+        icon:
+          $ref: '#/definitions/icon'
+          fieldDescription: >+
+
+
+            An optional icon to display with the link text or as the link,
+            specified by URL to its hosted location.
+             You can specify a particular width and height for the icon. Most link icons in Atlassian applications
+             are 16 by 16 pixels.
+
+        weight:
+          type: integer
+          fieldDescription: >+
+
+
+            Determines the order in which the web item appears in the menu or
+            list.
+
+             The "lightest" weight (i.e., lowest number) appears first, rising relative to other items,
+             while the "heaviest" weights sink to the bottom of the menu or list.
+
+             Built-in web items have weights that are incremented by numbers that leave room for additional
+             items, such as by 10 or 100. Be mindful of the weight you choose for your item, so that it appears
+             in a sensible order given existing items.
+
+          defaultValue: '100'
+        params:
+          additionalProperties: true
+          type: object
+          fieldTitle: Object
+          fieldDescription: >+
+
+
+            This object represents a map of key/value pairs, where each property
+            name and value corresponds to the parameter name and value
+            respectively.
+
+             <p><b>Example</b></p>
+
+
+
+
+
+                {
+                  "params": {
+                    "someOtherProperty": "someValue",
+                    "myCustomProperty": "myValue"
+                  }
+                }
+
+
+        url:
+          type: string
+          fieldDescription: >+
+
+
+            Specifies the destination of the web item. The interpretation of
+            this field depends on the value of the
+             <pre>context</pre> field.
+
+             <p>
+                 This field is required if the <code>target</code> of the item is not a
+                 <a href="../dialog/"><code>Dialog Module</code></a>.
+             </p>
+
+             Your add-on can receive [additional context](../../context-parameters/) from the application by
+             using variable tokens in the URL attribute.
+
+        target:
+          properties:
+            options:
+              type: object
+              fieldDescription: >+
+
+
+                <p>An object containing options which vary based on the type of
+                web item target you are implementing.</p>
+
+                 <p>Currently-allowed options are:</p>
+                 <ul>
+                     <li><a href="../inline-dialog-options/">Inline Dialog Options</a> when type is "inlinedialog", and</li>
+                     <li><a href="../dialog-options/">Dialog Options</a> when type is "dialog"</li>
+                     <li><a href="../dialog-module-options/">Dialog Module Options</a> when type is "dialogmodule"</li>
+                 </ul>
+
+              anyOf:
+                - properties:
+                    offsetX:
+                      maxLength: 10
+                      type: string
+                      fieldDescription: >+
+
+
+                        Sets an offset distance of the inline-dialog from the
+                        trigger element along the x-axis in pixels
+
+                    offsetY:
+                      maxLength: 10
+                      type: string
+                      fieldDescription: >+
+
+
+                        Sets an offset distance of the inline-dialog from the
+                        trigger element along the y-axis in pixels
+
+                    width:
+                      maxLength: 10
+                      type: string
+                      fieldDescription: |+
+
+
+                        Sets how wide the dialog is in pixels.
+
+                    onTop:
+                      type: boolean
+                      fieldDescription: >+
+
+
+                        Determines if the dialog should be shown above the
+                        trigger or not. If this option is true but there is
+                        insufficient room above the trigger the inline-dialog
+                        will be flipped to display below it
+
+                    showDelay:
+                      type: integer
+                      fieldDescription: >+
+
+
+                        Determines how long in milliseconds after a show trigger
+                        is fired (such as a trigger click) until the dialog is
+                        shown
+
+                    closeOthers:
+                      type: boolean
+                      fieldDescription: >+
+
+
+                        Determines if all other dialogs on the screen are closed
+                        when this one is opened
+
+                    persistent:
+                      type: boolean
+                      fieldDescription: |+
+
+
+                        This option, ignores the 'closeOthers' option
+
+                    onHover:
+                      type: boolean
+                      fieldDescription: >+
+
+
+                        Determines whether the inline-Dialog will show on a
+                        mouseOver or mouseClick of the trigger
+
+                    isRelativeToMouse:
+                      type: boolean
+                      fieldDescription: >+
+
+
+                        Determines if the dialog should be shown relative to
+                        where the mouse is at the time of the event trigger
+                        (normally a click) if set to false the dialog will show
+                        aligned to the left of the trigger with the arrow
+                        showing at the center
+
+                  shortClassName: inlineDialogOptions
+                  type: object
+                  title: Inline Dialog Options
+                  description: |+
+
+
+                    Options for an inline dialog target
+
+                     <h3>Example</h3>
+
+
+
+
+
+                        {
+                          "target": {
+                            "type": "inlinedialog",
+                            "options": {
+                              "onHover": true,
+                              "offsetX": "30px",
+                              "offsetY": "20px"
+                            }
+                          }
+                        }
+
+
+                - properties:
+                    key:
+                      maxLength: 100
+                      type: string
+                      fieldDescription: >+
+
+
+                        <p>The key of a <a href="../dialog/">Dialog</a> module
+                        declared in this Connect add-on.</p>
+
+                         <p>
+                         The dialog module will include the <a href="../dialog-options/">Dialog Options</a>
+                         that would otherwise need to be specified directly in this options object.
+                         </p>
+
+                  required:
+                    - key
+                  shortClassName: dialogModuleOptions
+                  type: object
+                  title: Dialog Module Options
+                  description: >+
+
+
+                    Options for a web-item targeting a common <a
+                    href="../dialog/">dialog module</a>.
+
+                     <h3>Example</h3>
+
+
+
+
+
+                        {
+                          "target": {
+                            "type": "dialogmodule",
+                            "options": {
+                              "key": "dialog-module-key"
+                            }
+                          }
+                        }
+
+
+                - properties:
+                    size:
+                      enum:
+                        - small
+                        - SMALL
+                        - medium
+                        - MEDIUM
+                        - large
+                        - LARGE
+                        - x-large
+                        - X-LARGE
+                        - fullscreen
+                        - FULLSCREEN
+                        - maximum
+                        - MAXIMUM
+                      type: string
+                      fieldDescription: |+
+
+
+                        Sets the size of the dialog.
+
+                         <p>
+                             This option is used instead of the 'height' and 'width' options.
+                         </p>
+
+                    chrome:
+                      type: boolean
+                      fieldDescription: >+
+
+
+                        Whether the dialog should contain the AUI header and
+                        buttons.
+
+                      defaultValue: 'true'
+                    width:
+                      maxLength: 10
+                      type: string
+                      fieldDescription: |+
+
+
+                        Sets how wide the dialog is in pixels.
+
+                    header:
+                      $ref: '#/definitions/i18nProperty'
+                      fieldDescription: |+
+
+
+                        The header text for the dialog, if chrome is enabled.
+
+                    height:
+                      maxLength: 10
+                      type: string
+                      fieldDescription: |+
+
+
+                        Sets how high the dialog is in pixels
+
+                  shortClassName: dialogOptions
+                  type: object
+                  title: Dialog Options
+                  description: >+
+
+
+                    Options for a modal dialog <a href="../web-item-target/">web
+                    item target</a> or <a href="../dialog/">common module</a>.
+
+                     <p>
+                         These options are a subset of those available via the <a href="../../jsapi/dialog/">JavaScript API</a>.
+                     </p>
+
+                     <h2>Web Item Example</h2>
+
+
+
+
+
+                        {
+                          "target": {
+                            "type": "dialog",
+                            "options": {
+                              "height": "100px",
+                              "width": "200px"
+                            }
+                          }
+                        }
+
+
+
+
+                     <h2>Dialog Example</h2>
+
+
+
+
+
+                        {
+                          "modules": {
+                            "dialogs": [
+                              {
+                                "url": "/my-dialog-content",
+                                "options": {
+                                  "size": "fullscreen",
+                                  "header": {
+                                    "value": "Example Dialog"
+                                  }
+                                },
+                                "key": "dialog-module-key"
+                              }
+                            ]
+                          }
+                        }
+
+
+            type:
+              enum:
+                - page
+                - PAGE
+                - dialog
+                - DIALOG
+                - inlinedialog
+                - INLINEDIALOG
+                - dialogmodule
+                - DIALOGMODULE
+              type: string
+              fieldDescription: >+
+
+
+                Defines how the web-item content should be loaded by the page.
+                By default, the web-item is loaded in the same
+                 page. The target can be set to open the web-item url as a modal dialog or an inline dialog.
+
+              defaultValue: page
+          shortClassName: webItemTargetBean
+          type: object
+          title: Web Item Target
+          description: >+
+
+
+            Defines the way a <a href="../web-item/">web item</a> link is opened
+            in the browser, such as in a modal or inline dialog.
+
+             <h2>Inline Dialog Example</h2>
+
+
+
+
+
+                {
+                  "target": {
+                    "type": "inlinedialog",
+                    "options": {
+                      "onHover": true,
+                      "offsetX": "30px",
+                      "offsetY": "20px"
+                    }
+                  }
+                }
+
+
+
+
+             <h2>Dialog Example</h2>
+
+
+
+
+
+                {
+                  "target": {
+                    "type": "dialog",
+                    "options": {
+                      "height": "100px",
+                      "width": "200px"
+                    }
+                  }
+                }
+
+
+
+
+             <h2>Common Dialog Module Example</h2>
+
+
+
+
+
+                {
+                  "target": {
+                    "type": "dialogmodule",
+                    "options": {
+                      "key": "dialog-module-key"
+                    }
+                  }
+                }
+
+
+
+
+             <p>More details for this use-case can be found on the <a href="../dialog/">Dialog Module</a> page.</p>
+
+          fieldDescription: |+
+
+
+            Defines the behaviour when the item is triggered.
+             If omitted, the url behaves as a regular hyperlink.
+
+        context:
+          enum:
+            - page
+            - PAGE
+            - addon
+            - ADDON
+            - product
+            - PRODUCT
+          type: string
+          fieldDescription: >+
+
+
+            The context for the URL parameter. Not applicable if an absolute URL
+            is specified. Possible values
+             <ul>
+                 <li><pre>addon</pre> - a URL relative to the add-on's base URL</li>
+                 <li><pre>page</pre> - targets a Page module by specifying the Page's module key as the URL</li>
+                 <li><pre>product</pre> - a URL relative to the product's base URL</li>
+             </ul>
+
+          defaultValue: addon
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        location:
+          maxLength: 100
+          type: string
+          fieldDescription: >+
+
+
+            The location in the application interface where the web item should
+            appear. For the Atlassian application
+             interface, a location is something like the coordinates on a map. It points to a particular drop-down menu or
+             navigation list in the UI.
+
+             Places in the Atlassian UI are identified by what are known as "well-known locations".
+             For example, the `system.admin/globalsettings` location is in the administrative
+             menu on the left side of the Administration Console.
+
+             Find product locations with the Web Fragment Finder
+
+             <ul>
+                 <li><a href="https://marketplace.atlassian.com/plugins/com.wittified.webfragment-finder/cloud/overview">Jira Locations</a></li>
+                 <li><a href="https://marketplace.atlassian.com/plugins/com.wittified.webfragment-finder-confluence/cloud/overview">Confluence locations</a></li>
+             </ul>
+
+        cacheable:
+          type: boolean
+          fieldDescription: >+
+
+
+            Returns whether the URL should be cacheable. Cacheable URLs are
+            taken directly from the add-on descriptor, and
+             lack all additional query parameters:
+             <ul>
+                 <li>standard iframe query parameters</li>
+                 <li>product context parameters</li>
+                 <li>JWT token</li>
+             </ul>
+
+          defaultValue: 'false'
+        conditions:
+          items:
+            type: object
+            anyOf:
+              - properties:
+                  condition:
+                    maxLength: 100
+                    type: string
+                    fieldDescription: |+
+
+
+                      A string indicating the name of the condition
+
+                  invert:
+                    type: boolean
+                    fieldDescription: >+
+
+
+                      A flag indicating whether to invert the boolean result of
+                      the condition.
+
+                    defaultValue: 'false'
+                  params:
+                    additionalProperties: true
+                    type: object
+                    fieldTitle: Object
+                    fieldDescription: >+
+
+
+                      This object represents a map of key/value pairs, where
+                      each property name and value corresponds to the parameter
+                      name and value respectively.
+
+                       <p><b>Example</b></p>
+
+
+
+
+
+                          {
+                            "params": {
+                              "someOtherProperty": "someValue",
+                              "myCustomProperty": "myValue"
+                            }
+                          }
+
+
+                required:
+                  - condition
+                shortClassName: singleConditionBean
+                type: object
+                title: Single Condition
+                description: >+
+
+
+                  Single Conditions are either provided by the host application.
+                  See the complete documentation of
+                   [Conditions](../../conditions/) for more information.
+
+                   To invert a condition, add the attribute ``invert="true"`` to the condition element.
+                   This is useful where you want to show the section if a certain condition is not satisfied.
+
+                   <h3>Example</h3>
+
+
+
+
+
+                      {
+                        "condition": "user_is_logged_in",
+                        "invert": false
+                      }
+
+
+              - properties:
+                  conditions:
+                    items:
+                      type: object
+                      anyOf:
+                        - properties:
+                            conditions:
+                              items:
+                                type: object
+                                anyOf:
+                                  - $ref: '#'
+                                  - $ref: '#/definitions/singleCondition'
+                              type: array
+                              fieldDescription: >+
+
+
+                                The conditions to compose using the specific
+                                logical operator.
+
+                            type:
+                              enum:
+                                - and
+                                - AND
+                                - or
+                                - OR
+                              type: string
+                              fieldDescription: >+
+
+
+                                Defines what logical operator is used to
+                                evaluate its collection of condition elements.
+
+                          shortClassName: compositeConditionBean
+                          type: object
+                          title: Composite Condition
+                          description: >+
+
+
+                            Composite Conditions are composed of a collection of
+                            [Single Condition](../single-condition/) / Composite
+                            Conditions
+                             and a type attribute.
+
+                             <h3>Example</h3>
+
+
+
+
+
+                                {
+                                  "conditions": [
+                                    {
+                                      "or": [
+                                        {
+                                          "condition": "can_attach_file_to_issue",
+                                          "invert": false
+                                        },
+                                        {
+                                          "condition": "is_issue_assigned_to_current_user",
+                                          "invert": false
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "condition": "user_is_logged_in",
+                                      "invert": false
+                                    }
+                                  ]
+                                }
+
+
+                        - $ref: '#/definitions/singleCondition'
+                    type: array
+                    fieldDescription: >+
+
+
+                      The conditions to compose using the specific logical
+                      operator.
+
+                  type:
+                    enum:
+                      - and
+                      - AND
+                      - or
+                      - OR
+                    type: string
+                    fieldDescription: >+
+
+
+                      Defines what logical operator is used to evaluate its
+                      collection of condition elements.
+
+                shortClassName: compositeConditionBean
+                type: object
+                title: Composite Condition
+                description: >+
+
+
+                  Composite Conditions are composed of a collection of [Single
+                  Condition](../single-condition/) / Composite Conditions
+                   and a type attribute.
+
+                   <h3>Example</h3>
+
+
+
+
+
+                      {
+                        "conditions": [
+                          {
+                            "or": [
+                              {
+                                "condition": "can_attach_file_to_issue",
+                                "invert": false
+                              },
+                              {
+                                "condition": "is_issue_assigned_to_current_user",
+                                "invert": false
+                              }
+                            ]
+                          },
+                          {
+                            "condition": "user_is_logged_in",
+                            "invert": false
+                          }
+                        ]
+                      }
+
+
+          type: array
+          fieldDescription: >+
+
+
+            <a href="../../conditions/">Conditions</a> can be added to display
+            only when all the given conditions are true.
+
+      definitions:
+        i18nProperty: *ref_0
+        icon: *ref_3
+        singleCondition: *ref_1
+    tags:
+      - forge
+  connect-jira:configurePage:
+    schema:
+      properties: *ref_5
+      definitions:
+        icon: *ref_3
+        i18nProperty: *ref_0
+        singleCondition: *ref_1
+        compositeCondition: *ref_2
+    tags:
+      - forge
+  connect-jira:dialogs:
+    schema:
+      properties:
+        options:
+          $ref: '#/definitions/dialogOptions'
+          fieldDescription: |+
+
+
+            <p>An object containing options for this dialog.</p>
+
+        cacheable:
+          type: boolean
+          fieldDescription: >+
+
+
+            Returns whether the URL should be cacheable. Cacheable URLs are
+            taken directly from the add-on descriptor, and
+             lack all additional query parameters:
+             <ul>
+                 <li>standard iframe query parameters</li>
+                 <li>product context parameters</li>
+                 <li>JWT token</li>
+             </ul>
+
+          defaultValue: 'false'
+        url:
+          type: string
+          fieldDescription: >+
+
+
+            Specifies the URL of the content displayed in the dialog. The URL
+            can be absolute or relative to either the
+             product URL or the add-on's base URL, depending on the _context_ attribute.
+
+             Your add-on can receive <a href="../../context-parameters/">additional context</a> from the application by
+             using variable tokens in the URL attribute.
+
+      definitions:
+        dialogOptions:
+          properties:
+            size:
+              enum:
+                - small
+                - SMALL
+                - medium
+                - MEDIUM
+                - large
+                - LARGE
+                - x-large
+                - X-LARGE
+                - fullscreen
+                - FULLSCREEN
+                - maximum
+                - MAXIMUM
+              type: string
+              fieldDescription: |+
+
+
+                Sets the size of the dialog.
+
+                 <p>
+                     This option is used instead of the 'height' and 'width' options.
+                 </p>
+
+            chrome:
+              type: boolean
+              fieldDescription: |+
+
+
+                Whether the dialog should contain the AUI header and buttons.
+
+              defaultValue: 'true'
+            width:
+              maxLength: 10
+              type: string
+              fieldDescription: |+
+
+
+                Sets how wide the dialog is in pixels.
+
+            header:
+              $ref: '#/definitions/i18nProperty'
+              fieldDescription: |+
+
+
+                The header text for the dialog, if chrome is enabled.
+
+            height:
+              maxLength: 10
+              type: string
+              fieldDescription: |+
+
+
+                Sets how high the dialog is in pixels
+
+          shortClassName: dialogOptions
+          type: object
+          title: Dialog Options
+          description: >+
+
+
+            Options for a modal dialog <a href="../web-item-target/">web item
+            target</a> or <a href="../dialog/">common module</a>.
+
+             <p>
+                 These options are a subset of those available via the <a href="../../jsapi/dialog/">JavaScript API</a>.
+             </p>
+
+             <h2>Web Item Example</h2>
+
+
+
+
+
+                {
+                  "target": {
+                    "type": "dialog",
+                    "options": {
+                      "height": "100px",
+                      "width": "200px"
+                    }
+                  }
+                }
+
+
+
+
+             <h2>Dialog Example</h2>
+
+
+
+
+
+                {
+                  "modules": {
+                    "dialogs": [
+                      {
+                        "url": "/my-dialog-content",
+                        "options": {
+                          "size": "fullscreen",
+                          "header": {
+                            "value": "Example Dialog"
+                          }
+                        },
+                        "key": "dialog-module-key"
+                      }
+                    ]
+                  }
+                }
+
+
+        i18nProperty: *ref_0
+    tags:
+      - forge
+  connect-jira:jiraEntityProperties:
+    schema:
+      properties:
+        entityType:
+          enum:
+            - issue
+            - ISSUE
+            - user
+            - USER
+            - project
+            - PROJECT
+          type: string
+          fieldDescription: |+
+
+
+            The type of the entity. The default value is issue.
+
+          defaultValue: issue
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        keyConfigurations:
+          items:
+            properties:
+              propertyKey:
+                type: string
+                fieldDescription: |+
+
+
+                  The key of the property from which the data is indexed.
+
+              extractions:
+                items:
+                  properties:
+                    objectName:
+                      type: string
+                      fieldDescription: >+
+
+
+                        The objectName to the JSON data which is supposed to be
+                        indexed. The objectName will be the key of a flattened
+                        JSON object with '.' as the delimiter.
+
+                         For instance, for JSON <code>"{"label": {"color": "red", "text":"connect"}}</code> the valid objectName
+                         referencing the color is label.color.
+
+                         It is important to note that the objectName can refer to an array type, where the 'type' field in the extraction should
+                         be the type of each element in the specified array.
+
+                    alias:
+                      type: string
+                      fieldDescription: >+
+
+
+                        The name, under which this property will be searchable
+                        with JQL.
+
+                    type:
+                      enum:
+                        - number
+                        - NUMBER
+                        - text
+                        - TEXT
+                        - string
+                        - STRING
+                        - user
+                        - USER
+                        - date
+                        - DATE
+                      type: string
+                      fieldDescription: |+
+
+
+                        The type of the referenced value.
+
+                         The type can be one of the following values:
+
+                         * `number`, which is indexed as a number and allows the range ordering and searching on this field.
+                         * `text`, which is tokenized before indexing and allows searching for particular words.
+                         * `string` which is indexed as is and allows searching for the exact phase only.
+                         * `user`, which is indexed as a user and allows user-based searching. The expected value is an _account ID_ string (a universal Atlassian user identifier).
+                         * `date`, which is indexed as a date and allows date range searching and ordering. The expected date format is [YYYY]-[MM]-[DD].
+                         The expected date time format is [YYYY]-[MM]-[DD]T[hh]:[mm] with optional offset from UTC: +/-[hh]:[mm] or `Z` for no offset.
+                         For reference, please see [ISO_8601 standard](http://www.w3.org/TR/NOTE-datetime).
+
+                  required:
+                    - objectName
+                    - type
+                  shortClassName: entityPropertyIndexExtractionConfigurationBean
+                  type: object
+                  title: Property Index
+                  description: >+
+
+
+                    Defines an entity property to be indexed by Jira. An entity
+                    property is a reference to a JSON object, which also defines
+                    it's type.
+                     <p><b>Example</b></p>
+
+
+
+
+
+                        {
+                          "objectName": "attachment.size",
+                          "type": "number",
+                          "alias": "attachmentSize"
+                        }
+
+
+                type: array
+                fieldDescription: >+
+
+
+                  The list with references to values of JSON object which will
+                  be indexed and the types of referenced values.
+
+            required:
+              - propertyKey
+              - extractions
+            shortClassName: entityPropertyIndexKeyConfigurationBean
+            type: object
+            title: Index Key Configuration
+            description: >+
+
+
+              Defines the list of extractors which index selected JSON objects
+              from defined property.
+
+               <p><b>Example</b></p>
+
+
+
+
+
+                  {
+                    "extractions": [
+                      {
+                        "objectName": "attachment.size",
+                        "type": "number"
+                      }
+                    ],
+                    "propertyKey": "attachment"
+                  }
+
+
+          type: array
+          fieldDescription: |+
+
+
+            List of properties from which selected values are indexed.
+
+      definitions:
+        i18nProperty: *ref_0
+    tags:
+      - forge
+  connect-jira:jiraFeatureFlagInfoProvider:
+    schema:
+      properties:
+        homeUrl:
+          type: string
+          fieldDescription: |+
+
+
+            URL to the provider's homepage
+
+        documentationUrl:
+          type: string
+          fieldDescription: |+
+
+
+            Optional URL to documentation about the provider's Jira integration
+
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        actions:
+          $ref: '#/definitions/featureFlagProviderActionsBean'
+          fieldDescription: >+
+
+
+            Optional actions that can be performed by Jira users, e.g., link an
+            existing flag, create a new flag, etc.
+
+        logoUrl:
+          type: string
+          fieldDescription: >+
+
+
+            Optional URL to the provider's logo, which will be displayed in the
+            UI
+
+      definitions:
+        i18nProperty: *ref_0
+        featureFlagProviderActionsBean:
+          properties:
+            linkFlag:
+              properties:
+                templateUrl:
+                  type: string
+                  fieldDescription: |+
+
+
+              required:
+                - templateUrl
+              shortClassName: featureFlagProviderActionBean
+              type: object
+              description: >+
+
+
+                <p>Defines the URL template that is used when an action is
+                invoked. The following context parameters are supported:
+                <code>{issue.key}</code>, <code>{issue.summary}</code>,
+                <code>{issue.flags}</code>.</p>
+
+              fieldDescription: |+
+
+
+                Action for linking an existing feature flag to a Jira issue.
+
+            createFlag:
+              properties:
+                templateUrl:
+                  type: string
+                  fieldDescription: |+
+
+
+              required:
+                - templateUrl
+              shortClassName: featureFlagProviderActionBean
+              type: object
+              description: >+
+
+
+                <p>Defines the URL template that is used when an action is
+                invoked. The following context parameters are supported:
+                <code>{issue.key}</code>, <code>{issue.summary}</code>,
+                <code>{issue.flags}</code>.</p>
+
+              fieldDescription: >+
+
+
+                Action for creating a feature flag and linking it with a Jira
+                issue.
+
+            listFlags:
+              properties:
+                templateUrl:
+                  type: string
+                  fieldDescription: |+
+
+
+              required:
+                - templateUrl
+              shortClassName: featureFlagProviderActionBean
+              type: object
+              description: >+
+
+
+                <p>Defines the URL template that is used when an action is
+                invoked. The following context parameters are supported:
+                <code>{issue.key}</code>, <code>{issue.summary}</code>,
+                <code>{issue.flags}</code>.</p>
+
+              fieldDescription: >+
+
+
+                Action for showing all linked feature flags, when there are
+                multiple feature flags linked to a Jira issue.
+
+          shortClassName: featureFlagProviderActionsBean
+          type: object
+          title: Feature Flag Actions
+          description: >+
+
+
+            <p>Feature flag actions that can be performed by Jira users.</p>
+
+            <p>Each action is optional (unless indicated otherwise). The absence
+            of an action indicates that the action is not supported by the
+            provider.</p>
+
+    tags:
+      - forge
+  connect-jira:jiraProjectPermissions:
+    schema:
+      properties:
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        description:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: >+
+
+
+            Description of the project permission. It will be displayed under
+            the permission's name.
+
+        category:
+          enum:
+            - projects
+            - PROJECTS
+            - issues
+            - ISSUES
+            - voters_and_watchers
+            - VOTERS_AND_WATCHERS
+            - comments
+            - COMMENTS
+            - attachments
+            - ATTACHMENTS
+            - time_tracking
+            - TIME_TRACKING
+            - other
+            - OTHER
+          type: string
+          fieldDescription: >+
+
+
+            The category of the project permission. This determines in which
+            section the permission will be displayed.
+
+          defaultValue: other
+        conditions:
+          items:
+            type: object
+            anyOf:
+              - $ref: '#/definitions/singleCondition'
+              - $ref: '#/definitions/compositeCondition'
+          type: array
+          fieldDescription: >+
+
+
+            <a href="../../conditions/">Conditions</a> can be added to display
+            only when all the given conditions are true.
+
+      definitions:
+        i18nProperty: *ref_0
+        singleCondition: *ref_1
+        compositeCondition: *ref_2
+    tags:
+      - forge
+  connect-jira:jiraProjectPages:
+    schema:
+      properties:
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        weight:
+          type: integer
+          fieldDescription: |+
+
+
+            Specifies the ordering of the link in the project sidebar.
+
+             <p>The "lightest" weight (i.e., lowest number) appears first, rising relative to other items, while the "heaviest"
+             weights sink to the bottom of the menu or list.</p>
+
+          defaultValue: '100'
+        iconUrl:
+          format: uri
+          type: string
+          fieldDescription: >+
+
+
+            Specifies an icon URL that will displayed alongside the link to the
+            project page in the project sidebar.
+
+             The icon resource provided in this field should be larger or equals to 16x16 pixels.<br>
+
+        conditions:
+          items:
+            type: object
+            anyOf:
+              - $ref: '#/definitions/singleCondition'
+              - $ref: '#/definitions/compositeCondition'
+          type: array
+          fieldDescription: >+
+
+
+            <a href="../../conditions/">Conditions</a> can be added to display
+            only when all the given conditions are true.
+
+        url:
+          format: uri
+          type: string
+          fieldDescription: >+
+
+
+            Specifies the URL targeted by the page. The URL is relative to the
+            add-on's base URL.
+
+      definitions:
+        i18nProperty: *ref_0
+        singleCondition: *ref_1
+        compositeCondition: *ref_2
+    tags:
+      - forge
+  connect-jira:jiraSearchRequestViews:
+    schema:
+      properties:
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        weight:
+          type: integer
+          fieldDescription: >+
+
+
+            Determines the order in which the Search Request View entry appears
+            in the <em>Export</em> menu.
+
+             The "lightest" weight (i.e., lowest number) appears first, rising relative to other items,
+             while the "heaviest" weights sink to the bottom of the menu or list.
+
+        description:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A description of your Search Request View
+
+        conditions:
+          items:
+            type: object
+            anyOf:
+              - $ref: '#/definitions/compositeCondition'
+              - $ref: '#/definitions/singleCondition'
+          type: array
+          fieldDescription: >+
+
+
+            <a href="../../conditions/">Conditions</a> can be added to display
+            only when all the given conditions are true.
+
+        params:
+          additionalProperties: true
+          type: object
+          fieldTitle: Object
+          fieldDescription: >+
+
+
+            This object represents a map of key/value pairs, where each property
+            name and value corresponds to the parameter name and value
+            respectively.
+
+             <p><b>Example</b></p>
+
+
+
+
+
+                {
+                  "params": {
+                    "someOtherProperty": "someValue",
+                    "myCustomProperty": "myValue"
+                  }
+                }
+
+
+        url:
+          type: string
+          fieldDescription: >+
+
+
+            The URL of the service that will render the representation for the
+            result set. The URL is
+             interpreted relative to the <em>baseUrl</em> in the descriptor.
+
+      definitions:
+        i18nProperty: *ref_0
+        compositeCondition: *ref_2
+        singleCondition: *ref_1
+    tags:
+      - forge
+  connect-jira:jiraIssueGlances:
+    schema:
+      properties:
+        icon:
+          $ref: '#/definitions/icon'
+          fieldDescription: |+
+
+
+            Specifies an icon to display at the left of the glance view control.
+             The icon resource provided in this field should be 24x24 pixels or larger, preferably in SVG format.
+
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        conditions:
+          items:
+            type: object
+            anyOf:
+              - $ref: '#/definitions/singleCondition'
+              - $ref: '#/definitions/compositeCondition'
+          type: array
+          fieldDescription: >+
+
+
+            <a href="../../conditions/">Conditions</a> can be added to display
+            only when all the given conditions are true.
+
+        content:
+          type: object
+          fieldDescription: >+
+
+
+            This content becomes the label next to the icon. It's handy for
+            communicating a small amount of information.
+
+             Read about [Issue Glance Content Label](/cloud/jira/platform/modules/issue-glance-content-label/).
+
+          anyOf:
+            - properties:
+                label:
+                  $ref: '#/definitions/i18nProperty'
+                  fieldDescription: |+
+
+
+                type:
+                  enum:
+                    - label
+                    - LABEL
+                  type: string
+                  fieldDescription: |+
+
+
+                    The type field must be set to 'label'
+
+              required:
+                - label
+                - type
+              shortClassName: issueGlanceContentLabelBean
+              type: object
+              title: Issue Glance Content Label
+              description: >+
+
+
+                Describes the content for the issue glance module. It specifies
+                static text to show inside the glance, which is left-aligned
+                next to the icon.
+
+        target:
+          type: object
+          fieldDescription: |+
+
+
+            Specifies the target action when clicking on the glance.
+
+             Read about [Issue Glance Target Web Panel](/cloud/jira/platform/modules/issue-glance-target-web-panel/).
+
+          properties:
+            type:
+              enum:
+                - web_panel
+                - WEB_PANEL
+              type: string
+              fieldDescription: |+
+
+
+                The type field must be set to 'web_panel'
+
+            url:
+              format: uri
+              type: string
+              fieldDescription: >+
+
+
+                The URL of the app resource that provides the web panel content.
+                This URL must be relative to the app's baseUrl.
+
+          required:
+            - type
+            - url
+          shortClassName: issueGlanceTargetWebPanelBean
+          title: Issue Glance Target Web Panel
+          description: >+
+
+
+            Describes the target of the issue glance module. This supports
+            displaying a web panel in the context area of the issue.
+
+        jiraNativeAppsEnabled:
+          type: boolean
+          fieldDescription: >+
+
+
+            Specifies whether the issue glance will be shown in the Jira mobile
+            and desktop clients.
+
+             The issue glance will be shown in Jira for iOS/Mac version 109 or later and Jira for Android version 55 or later.
+
+             Read about [enabling your addon for the Jira mobile and desktop clients](/cloud/jira/platform/developing-apps-for-jira-cloud-mobile/).
+
+          defaultValue: 'false'
+      definitions:
+        icon: *ref_3
+        i18nProperty: *ref_0
+        singleCondition: *ref_1
+        compositeCondition: *ref_2
+    tags:
+      - forge
+  connect-jira:jiraIssueTabPanels:
+    schema:
+      properties: &ref_7
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        weight:
+          type: integer
+          fieldDescription: >+
+
+
+            <p>Determines the order in which the tab panel's link appears in the
+            menu or list.</p>
+
+             <p>The "lightest" weight (i.e., lowest number) appears first, rising relative to other items,
+             while the "heaviest" weights sink to the bottom of the menu or list.</p>
+
+             <p>Built-in web items have weights that are incremented by numbers that leave room for additional
+             items, such as by 10 or 100. Be mindful of the weight you choose for your item, so that it appears
+             in a sensible order given existing items.</p>
+
+        conditions:
+          items:
+            type: object
+            anyOf:
+              - properties:
+                  conditions:
+                    items:
+                      type: object
+                      anyOf:
+                        - $ref: '#/definitions/singleCondition'
+                        - properties:
+                            conditions:
+                              items:
+                                type: object
+                                anyOf:
+                                  - $ref: '#/definitions/singleCondition'
+                                  - $ref: '#'
+                              type: array
+                              fieldDescription: >+
+
+
+                                The conditions to compose using the specific
+                                logical operator.
+
+                            type:
+                              enum:
+                                - and
+                                - AND
+                                - or
+                                - OR
+                              type: string
+                              fieldDescription: >+
+
+
+                                Defines what logical operator is used to
+                                evaluate its collection of condition elements.
+
+                          shortClassName: compositeConditionBean
+                          type: object
+                          title: Composite Condition
+                          description: >+
+
+
+                            Composite Conditions are composed of a collection of
+                            [Single Condition](../single-condition/) / Composite
+                            Conditions
+                             and a type attribute.
+
+                             <h3>Example</h3>
+
+
+
+
+
+                                {
+                                  "conditions": [
+                                    {
+                                      "or": [
+                                        {
+                                          "condition": "can_attach_file_to_issue",
+                                          "invert": false
+                                        },
+                                        {
+                                          "condition": "is_issue_assigned_to_current_user",
+                                          "invert": false
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "condition": "user_is_logged_in",
+                                      "invert": false
+                                    }
+                                  ]
+                                }
+
+
+                    type: array
+                    fieldDescription: >+
+
+
+                      The conditions to compose using the specific logical
+                      operator.
+
+                  type:
+                    enum:
+                      - and
+                      - AND
+                      - or
+                      - OR
+                    type: string
+                    fieldDescription: >+
+
+
+                      Defines what logical operator is used to evaluate its
+                      collection of condition elements.
+
+                shortClassName: compositeConditionBean
+                type: object
+                title: Composite Condition
+                description: >+
+
+
+                  Composite Conditions are composed of a collection of [Single
+                  Condition](../single-condition/) / Composite Conditions
+                   and a type attribute.
+
+                   <h3>Example</h3>
+
+
+
+
+
+                      {
+                        "conditions": [
+                          {
+                            "or": [
+                              {
+                                "condition": "can_attach_file_to_issue",
+                                "invert": false
+                              },
+                              {
+                                "condition": "is_issue_assigned_to_current_user",
+                                "invert": false
+                              }
+                            ]
+                          },
+                          {
+                            "condition": "user_is_logged_in",
+                            "invert": false
+                          }
+                        ]
+                      }
+
+
+              - properties:
+                  condition:
+                    maxLength: 100
+                    type: string
+                    fieldDescription: |+
+
+
+                      A string indicating the name of the condition
+
+                  invert:
+                    type: boolean
+                    fieldDescription: >+
+
+
+                      A flag indicating whether to invert the boolean result of
+                      the condition.
+
+                    defaultValue: 'false'
+                  params:
+                    additionalProperties: true
+                    type: object
+                    fieldTitle: Object
+                    fieldDescription: >+
+
+
+                      This object represents a map of key/value pairs, where
+                      each property name and value corresponds to the parameter
+                      name and value respectively.
+
+                       <p><b>Example</b></p>
+
+
+
+
+
+                          {
+                            "params": {
+                              "someOtherProperty": "someValue",
+                              "myCustomProperty": "myValue"
+                            }
+                          }
+
+
+                required:
+                  - condition
+                shortClassName: singleConditionBean
+                type: object
+                title: Single Condition
+                description: >+
+
+
+                  Single Conditions are either provided by the host application.
+                  See the complete documentation of
+                   [Conditions](../../conditions/) for more information.
+
+                   To invert a condition, add the attribute ``invert="true"`` to the condition element.
+                   This is useful where you want to show the section if a certain condition is not satisfied.
+
+                   <h3>Example</h3>
+
+
+
+
+
+                      {
+                        "condition": "user_is_logged_in",
+                        "invert": false
+                      }
+
+
+          type: array
+          fieldDescription: >+
+
+
+            <a href="../../conditions/">Conditions</a> can be added to display
+            only when all the given conditions are true.
+
+        params:
+          additionalProperties: true
+          type: object
+          fieldTitle: Object
+          fieldDescription: >+
+
+
+            This object represents a map of key/value pairs, where each property
+            name and value corresponds to the parameter name and value
+            respectively.
+
+             <p><b>Example</b></p>
+
+
+
+
+
+                {
+                  "params": {
+                    "someOtherProperty": "someValue",
+                    "myCustomProperty": "myValue"
+                  }
+                }
+
+
+        url:
+          format: uri
+          type: string
+          fieldDescription: >+
+
+
+            Specifies the URL targeted by the tab panel. The URL is relative to
+            the add-on's base URL.
+
+      definitions:
+        i18nProperty: *ref_0
+        singleCondition: *ref_1
+    tags:
+      - forge
+  connect-jira:jiraBuildInfoProvider:
+    schema:
+      properties:
+        homeUrl:
+          type: string
+          fieldDescription: |+
+
+
+            URL to the provider's homepage
+
+        documentationUrl:
+          type: string
+          fieldDescription: |+
+
+
+            Optional URL to documentation about the provider's Jira integration
+
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        actions:
+          properties: {}
+          shortClassName: buildProviderAllActionsBean
+          type: object
+          description: |+
+
+
+            <p>Build actions that can be performed by Jira users.</p>
+             <p>Currently there are no actions defined for build providers. Please contact us if you need any.</p>
+
+          fieldDescription: |+
+
+
+            Optional actions that can be performed by Jira users
+
+        logoUrl:
+          type: string
+          fieldDescription: >+
+
+
+            Optional URL to the provider's logo, which will be displayed in the
+            UI
+
+      definitions:
+        i18nProperty: *ref_0
+    tags:
+      - forge
+  connect-jira:jiraWorkflowConditions:
+    schema:
+      properties:
+        view:
+          $ref: '#/definitions/url'
+          fieldDescription: >+
+
+
+            The relative URL to the app page that shows the read-only
+            configuration or summary of the workflow condition.
+
+             The view URL can contain the following context parameters:
+
+             - `condition.id`: The unique identifier of the condition.
+             - `condition.config`: The configuration value saved to Jira after calling `WorkflowConfiguration.onSave`.
+
+        expression:
+          type: string
+          fieldDescription: >+
+
+
+            The [Jira
+            expression](https://developer.atlassian.com/cloud/jira/platform/rest/v3/#api-api-3-expression-eval-post)
+             used to evaluate the condition. Must return a boolean value.
+             <p>
+             This expression can be overridden using the configuration page.
+             If you return configuration with property "expression", then that expression will be used
+             to evaluate the condition instead of the expression defined here. For example:
+
+             <pre><code>AP.require(["jira"], function(jira) {
+                jira.WorkflowConfiguration.onSave(function() {
+                    var config = {
+                        "expression": "dynamically built expression"
+                    };
+                    return JSON.stringify(config);
+                });
+            });</code></pre>
+
+        edit:
+          $ref: '#/definitions/url'
+          fieldDescription: >+
+
+
+            The relative URL to the app page that allows to configure the
+            workflow condition once it exists.
+
+             The edit URL can contain the following context parameters:
+
+             - `condition.id`: The unique identifier of the condition.
+             - `condition.config`: The configuration value saved to Jira after calling `WorkflowConfiguration.onSave`.
+
+        evaluationContext:
+          enum:
+            - user
+            - USER
+            - app
+            - APP
+          type: string
+          fieldDescription: >+
+
+
+            EXPERIMENTAL. Controls how to run the expression during the
+            transition.
+
+             - `user`: The expression will be evaluated in the context of the user making the transition (default).
+             - `app`: The expression will be evaluated in the context of the app user.
+
+             If the expression needs to perform some operations which require permissions that the user making
+             the transition might not have, choose `app` and make sure that your app has appropriate scopes.
+
+             Note: regardless of the value selected here, the `user` variable in the expression always points to the user that performs the transition.
+
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        description:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: >+
+
+
+            The description of the workflow condition. This will be presented to
+            the user when they add a new condition to a Jira workflow.
+
+        create:
+          $ref: '#/definitions/url'
+          fieldDescription: >+
+
+
+            The relative URL to the app page that allows to configure the
+            workflow condition on creation.
+
+      definitions:
+        url: &ref_6
+          properties:
+            url:
+              format: uri
+              type: string
+              fieldDescription: |+
+
+
+          required:
+            - url
+          shortClassName: urlBean
+          type: object
+          title: URL
+          description: |+
+
+
+        i18nProperty: *ref_0
+    tags:
+      - forge
+  connect-jira:jiraProjectAdminTabPanels:
+    schema:
+      properties:
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        weight:
+          type: integer
+          fieldDescription: >+
+
+
+            <p>Determines the order in which the tab panel's link appears in the
+            menu or list.</p>
+
+             <p>The "lightest" weight (i.e., lowest number) appears first, rising relative to other items,
+             while the "heaviest" weights sink to the bottom of the menu or list.</p>
+
+             <p>Built-in web items have weights that are incremented by numbers that leave room for additional
+             items, such as by 10 or 100. Be mindful of the weight you choose for your item, so that it appears
+             in a sensible order given existing items.</p>
+
+        location:
+          type: string
+          fieldDescription: >+
+
+
+            The name of the group of tabs in the project configuration where the
+            tab panel should appear.
+             The following are accepted values.
+
+             * `projectgroup1`
+             * `projectgroup2`
+             * `projectgroup3`
+             * `projectgroup4`
+
+            See [Project Configuration
+            Locations](https://developer.atlassian.com/jiradev/jira-architecture/web-fragments/project-configuration-locations#ProjectConfigurationLocations-AddingNewItemstoExistingWebSections)
+            for details.
+
+        conditions:
+          items:
+            type: object
+            anyOf:
+              - $ref: '#/definitions/singleCondition'
+              - $ref: '#/definitions/compositeCondition'
+          type: array
+          fieldDescription: >+
+
+
+            <a href="../../conditions/">Conditions</a> can be added to display
+            only when all the given conditions are true.
+
+        params:
+          additionalProperties: true
+          type: object
+          fieldTitle: Object
+          fieldDescription: >+
+
+
+            This object represents a map of key/value pairs, where each property
+            name and value corresponds to the parameter name and value
+            respectively.
+
+             <p><b>Example</b></p>
+
+
+
+
+
+                {
+                  "params": {
+                    "someOtherProperty": "someValue",
+                    "myCustomProperty": "myValue"
+                  }
+                }
+
+
+        url:
+          format: uri
+          type: string
+          fieldDescription: >+
+
+
+            Specifies the URL targeted by the tab panel. The URL is relative to
+            the add-on's base URL.
+
+      definitions:
+        i18nProperty: *ref_0
+        singleCondition: *ref_1
+        compositeCondition: *ref_2
+    tags:
+      - forge
+  connect-jira:jiraWorkflowValidators:
+    schema:
+      properties:
+        view:
+          $ref: '#/definitions/url'
+          fieldDescription: >+
+
+
+            The relative URL to the app page that shows the read-only
+            configuration or summary of the workflow validator.
+
+             The view URL can contain the following context parameters:
+
+             - `validator.id`: The unique identifier of the validator.
+             - `validator.config`: The configuration value saved to Jira after calling `WorkflowConfiguration.onSave`.
+
+        expression:
+          type: string
+          fieldDescription: >+
+
+
+            The [Jira
+            expression](https://developer.atlassian.com/cloud/jira/platform/rest/v3/#api-api-3-expression-eval-post)
+             used to evaluate the validator. Must return a boolean or string value.
+             <p>
+             This expression can be overridden using the configuration page.
+             If you return configuration with property "expression", then that expression will be used
+             to evaluate the validator instead of the expression defined here. For example:
+
+             <pre><code>AP.require(["jira"], function(jira) {
+                jira.WorkflowConfiguration.onSave(function() {
+                    var config = {
+                        "expression": "dynamically built expression"
+                    };
+                    return JSON.stringify(config);
+                });
+            });</code></pre>
+
+        edit:
+          $ref: '#/definitions/url'
+          fieldDescription: >+
+
+
+            The relative URL to the app page that allows to configure the
+            workflow validator once it exists.
+
+             The edit URL can contain the following context parameters:
+
+             - `validator.id`: The unique identifier of the validator.
+             - `validator.config`: The configuration value saved to Jira after calling `WorkflowConfiguration.onSave`.
+
+        evaluationContext:
+          enum:
+            - user
+            - USER
+            - app
+            - APP
+          type: string
+          fieldDescription: >+
+
+
+            EXPERIMENTAL. Controls how the expression is run during the
+            transition:
+
+             - `user`: The expression is evaluated in the context of the user making the transition (default).
+             - `app`: The expression is evaluated in the context of the app user.
+
+             If the expression performs operations that require permissions but
+             the user making the transition cannot be guaranteed to have those permissions,
+             choose `app` and make sure that your app has the appropriate scopes.
+
+             Note: regardless of the value selected here, the `user` variable in the expression always points to the user that performs the transition.
+
+        errorMessage:
+          type: object
+          fieldDescription: >+
+
+
+            The error message that will be shown if the validator rejects the
+            transition by returning <code>false</code>.
+             <p>
+             This can be either a static [i18n property](../i18n-property/), or an object containing the "expression" property,
+             with a Jira expression that returns the error message dynamically, based on the current transition or configuration.
+
+          anyOf:
+            - properties:
+                expression:
+                  type: string
+                  fieldDescription: >+
+
+
+                    The Jira expression that will return an error message if the
+                    validator rejects a transition.
+
+              required:
+                - expression
+              shortClassName: validatorJiraExpressionErrorMessage
+              type: object
+              title: Jira Expression Error Message
+              description: >+
+
+
+                A Jira expression that will be evaluated if the workflow
+                validator fails.
+                 The string returned by the Jira expression will be displayed as the error message for the failed transition.
+
+            - properties:
+                value:
+                  maxLength: 1500
+                  type: string
+                  fieldDescription: >+
+
+
+                    The human-readable default value. This will be used if no
+                    translation exists.
+                     Only the following HTML tags are supported: `b`, `i`, `strong`, `em`, and `code`.
+
+                i18n:
+                  maxLength: 300
+                  type: string
+                  fieldDescription: |+
+
+
+                    The localization key for the human-readable value.
+                     <a href="../../internationalization/">Translations</a> for the keys are defined at the top level of the
+                     <a href="../../add-on-descriptor/">add-on descriptor</a>.
+
+              required:
+                - value
+              shortClassName: validatorI18nErrorMessage
+              type: object
+              title: i18n Property
+              description: >+
+
+
+                Represents a string that can be resolved via a localization
+                properties file. You can use the same `i18n Property` key
+                 and value in multiple places if you like, but identical keys must have identical values.
+
+                 <h3>Example</h3>
+
+
+
+
+
+                    {
+                      "value": "My text"
+                    }
+
+
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        description:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: >+
+
+
+            The description of the workflow validator. This will be presented to
+            the user when they add a new validator to a Jira workflow.
+
+        create:
+          $ref: '#/definitions/url'
+          fieldDescription: >+
+
+
+            The relative URL to the app page that allows to configure the
+            workflow validator on creation.
+
+      definitions:
+        url: *ref_6
+        i18nProperty: *ref_0
+    tags:
+      - forge
+  connect-jira:jiraRemoteLinkInfoProvider:
+    schema:
+      properties:
+        homeUrl:
+          format: uri
+          type: string
+          fieldDescription: |+
+
+
+            URL to the provider's homepage
+
+        documentationUrl:
+          format: uri
+          type: string
+          fieldDescription: |+
+
+
+            Optional URL to documentation about the provider's Jira integration
+
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        actions:
+          items:
+            properties:
+              actionId:
+                type: string
+                fieldDescription: >+
+
+
+                  <p>A key to identify a specific action. Used for associating a
+                  specific Remote link to an action of this ID. The actionId of
+                  an action must be unique across all actions.</p>
+
+              actionLabel:
+                properties:
+                  value:
+                    $ref: '#/definitions/i18nProperty'
+                    fieldDescription: |+
+
+
+                required:
+                  - value
+                shortClassName: remoteLinkProviderActionLabelBean
+                type: object
+                description: |+
+
+
+                fieldDescription: >+
+
+
+                  <p>The actionLabel of an Action is shown visibly to the User
+                  alongside the Remote Link.</p>
+
+              templateUrl:
+                format: uri
+                type: string
+                fieldDescription: >+
+
+
+                  <p>The templateUrl of an Action is a template where strings
+                  can be substituted into the URL for a specific Remote Link.
+                  Strings used in the templateUrl must be passed in via an
+                  attribute map when associating an action with a remote
+                  link.</p>
+
+            required:
+              - actionId
+              - actionLabel
+              - templateUrl
+            shortClassName: remoteLinkProviderActionBean
+            type: object
+            description: |+
+
+
+              <p>Defines the Remote Link action that can be invoked.</p>
+
+          type: array
+          fieldDescription: >+
+
+
+            Optional actions that can be performed by Jira users on the remote
+            link
+
+        logoUrl:
+          format: uri
+          type: string
+          fieldDescription: >+
+
+
+            Optional URL to the provider's logo, which will be displayed in the
+            UI
+
+      definitions:
+        i18nProperty: *ref_0
+    tags:
+      - forge
+  connect-jira:jiraBackgroundScripts:
+    schema:
+      properties:
+        location:
+          type: object
+          fieldDescription: >+
+
+
+            Specifies where the background script will be located inside Jira,
+            and any location-specific configuration.
+             Currently, a background script can only be located in the new issue view and on the dashboards.
+
+             Read about [Issue Background Script Location](/cloud/jira/platform/modules/issue-background-script-location/).
+
+          anyOf:
+            - properties:
+                type:
+                  enum:
+                    - issue_view
+                    - ISSUE_VIEW
+                    - dashboard
+                    - DASHBOARD
+                  type: string
+                  fieldDescription: |+
+
+
+                    The type field must be set to 'dashboard'
+
+              required:
+                - type
+              shortClassName: dashboardBackgroundScriptLocationBean
+              type: object
+              title: Dashboard Background Script Location
+              description: >+
+
+
+                Describes the location of the dashboard background script
+                module.
+
+            - properties:
+                type:
+                  enum:
+                    - issue_view
+                    - ISSUE_VIEW
+                    - dashboard
+                    - DASHBOARD
+                  type: string
+                  fieldDescription: |+
+
+
+                    The type field must be set to 'issue-view'
+
+                shouldReloadOnRefresh:
+                  type: boolean
+                  fieldDescription: >+
+
+
+                    Whether the background script iframe should reload when the
+                    issue is refreshed.
+
+              required:
+                - type
+              shortClassName: issueViewBackgroundScriptLocationBean
+              type: object
+              title: Issue Background Script Location
+              description: |+
+
+
+                Describes the location of the issue background script module.
+
+        url:
+          format: uri
+          type: string
+          fieldDescription: >+
+
+
+            The URL of the app resource that serves the iframe containing the
+            background script.
+             As with other app iframes, the iframe must load all.js.
+             This URL does not support [context parameters](/cloud/jira/platform/context-parameters/).
+             This URL must be relative to the app's baseUrl.
+
+      definitions: {}
+    tags:
+      - forge
+  connect-jira:jiraDeploymentInfoProvider:
+    schema:
+      properties:
+        homeUrl:
+          type: string
+          fieldDescription: |+
+
+
+            URL to the provider's homepage
+
+        documentationUrl:
+          type: string
+          fieldDescription: |+
+
+
+            Optional URL to documentation about the provider's Jira integration
+
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        actions:
+          properties:
+            listDeployments:
+              properties:
+                templateUrl:
+                  type: string
+                  fieldDescription: |+
+
+
+              required:
+                - templateUrl
+              shortClassName: deploymentProviderActionBean
+              type: object
+              description: >+
+
+
+                <p>Defines the URL template that is used when an action is
+                invoked. The following context parameters are supported:
+                <code>{issue.key}</code>, <code>{issue.summary}</code>,
+                <code>{issue.deployments}</code>.</p>
+
+              fieldDescription: >+
+
+
+                Action for showing all linked deployments, when there are
+                multiple deployments linked to a Jira issue.
+
+          shortClassName: deploymentProviderAllActionsBean
+          type: object
+          description: >+
+
+
+            <p>Deployment actions that can be performed by Jira users.</p>
+
+            <p>Each action is optional (unless indicated otherwise). The absence
+            of an action indicates that the action is not supported by the
+            provider.</p>
+
+          fieldDescription: >+
+
+
+            Optional actions that can be performed by Jira users, e.g., list all
+            deployments associated with the issue.
+
+        logoUrl:
+          type: string
+          fieldDescription: >+
+
+
+            Optional URL to the provider's logo, which will be displayed in the
+            UI
+
+      definitions:
+        i18nProperty: *ref_0
+    tags:
+      - forge
+  connect-jira:jiraReports:
+    schema:
+      properties:
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        description:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: >+
+
+
+            A human-readable description of this report module. This description
+            is displayed on the reports list.
+
+        reportCategory:
+          enum:
+            - agile
+            - AGILE
+            - issue_analysis
+            - ISSUE_ANALYSIS
+            - forecast_management
+            - FORECAST_MANAGEMENT
+            - other
+            - OTHER
+          type: string
+          fieldDescription: |+
+
+
+            The category of the report. The default category is other.
+
+          defaultValue: other
+        url:
+          format: uri
+          type: string
+          fieldDescription: >+
+
+
+            Specifies the URL targeted by the report. The URL is relative to the
+            add-on's base URL.
+
+        thumbnailUrl:
+          format: uri
+          type: string
+          fieldDescription: >+
+
+
+            Specifies the URL of the report thumbnail. The URL is relative to
+            the add-on's base URL.
+
+      definitions:
+        i18nProperty: *ref_0
+    tags:
+      - forge
+  connect-jira:jiraIssueContexts:
+    schema:
+      properties:
+        icon:
+          $ref: '#/definitions/icon'
+          fieldDescription: >+
+
+
+            Specifies an icon to display at the left of the context view
+            control.
+             The icon resource provided in this field should be 24x24 pixels or larger, preferably in SVG format.
+
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        conditions:
+          items:
+            type: object
+            anyOf:
+              - $ref: '#/definitions/singleCondition'
+              - $ref: '#/definitions/compositeCondition'
+          type: array
+          fieldDescription: >+
+
+
+            <a href="../../conditions/">Conditions</a> can be added to display
+            only when all the given conditions are true.
+
+        content:
+          type: object
+          fieldDescription: >+
+
+
+            This content becomes the label next to the icon. It's handy for
+            communicating a small amount of information.
+
+             Read about [Issue Context Content Label](/cloud/jira/platform/modules/issue-glance-content-label/). // TODO BENTO-11598: change this path when doc is updated
+
+          anyOf:
+            - properties:
+                label:
+                  $ref: '#/definitions/i18nProperty'
+                  fieldDescription: |+
+
+
+                type:
+                  enum:
+                    - label
+                    - LABEL
+                  type: string
+                  fieldDescription: >+
+
+
+                    The type field must be set to 'label' since we currently
+                    only support 'label' for context panel content
+
+              required:
+                - label
+                - type
+              shortClassName: issueContextContentLabelBean
+              type: object
+              title: Issue Context Content Label
+              description: >+
+
+
+                Describes the content for the issue context module. It specifies
+                static text to show inside the context panel, which is
+                left-aligned next to the icon.
+
+        target:
+          type: object
+          fieldDescription: |+
+
+
+            Specifies the target action when clicking on the context.
+
+             Read about [Issue Context Target Web Panel](/cloud/jira/platform/modules/issue-glance-target-web-panel/). // TODO BENTO-11598: change this path when doc is updated
+
+          anyOf:
+            - properties:
+                type:
+                  enum:
+                    - web_panel
+                    - WEB_PANEL
+                  type: string
+                  fieldDescription: |+
+
+
+                    The type field must be set to 'web_panel'
+
+                url:
+                  format: uri
+                  type: string
+                  fieldDescription: >+
+
+
+                    The URL of the app resource that provides the web panel
+                    content. This URL must be relative to the app's baseUrl.
+
+              required:
+                - type
+                - url
+              shortClassName: issueContextTargetWebPanelBean
+              type: object
+              title: Issue Context Target Web Panel
+              description: >+
+
+
+                Describes the target of the issue context module. This supports
+                displaying a web panel in the context area of the issue.
+
+        jiraNativeAppsEnabled:
+          type: boolean
+          fieldDescription: >+
+
+
+            Specifies whether the issue context will be shown in the Jira mobile
+            and desktop clients.
+
+             The issue context will be shown in Jira for iOS/Mac version 109 or later and Jira for Android version 55 or later.
+
+             Read about [enabling your addon for the Jira mobile and desktop clients](/cloud/jira/platform/developing-apps-for-jira-cloud-mobile/).
+
+          defaultValue: 'false'
+      definitions:
+        icon: *ref_3
+        i18nProperty: *ref_0
+        singleCondition: *ref_1
+        compositeCondition: *ref_2
+    tags:
+      - forge
+  connect-jira:jiraDashboardItems:
+    schema:
+      properties:
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        description:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: >+
+
+
+            Description of the dashboard item. This will be displayed for a user
+            in the directory.
+
+        conditions:
+          items:
+            type: object
+            anyOf:
+              - $ref: '#/definitions/singleCondition'
+              - $ref: '#/definitions/compositeCondition'
+          type: array
+          fieldDescription: >+
+
+
+            <a href="../../conditions/">Conditions</a> can be added to display
+            only when all the given conditions are true.
+
+        url:
+          format: uri
+          type: string
+          fieldDescription: >+
+
+
+            The URL of the service which will render the dashboard item.
+            Following context parameters are supported in
+             url.
+
+             * `dashboard.id` unique id of the dashboard on which the item is rendered. This parameter is passed only on default view
+             * `dashboardItem.id` unique id of the dashboard item which is rendered. This parameter is passed only on default view
+             * `dashboardItem.key` key of the dashboard item. This parameter is passed in both: default and directory view
+             * `dashboardItem.viewType` type of the view in which dashboard item is displayed. Default (for dashboard) and directory. This list may be extended
+
+        configurable:
+          type: boolean
+          fieldDescription: >+
+
+
+            Specify if the dashboard-item is configurable or not. Configurable
+            dashboard items should render configuration
+             view if there is no configuration stored for the dashboard item. [Dashboard item properties](../../jira-rest-api-scopes/) can
+             be used for configuration storage.
+
+             In addition, configurable dashboard items should register a javascript callback for `edit click`.
+
+                 AP.require(['jira'], function (jira) {
+                    jira.DashboardItem.onDashboardItemEdit(function() {
+                       // render dashboard item configuration now
+                    });
+                 });
+
+             It is a common case to give users ability to set the name of the dashboard item. This can be achieved with a following
+             JS code:
+
+                 AP.require(['jira'], function(jira) {
+                    jira.setDashboardItemTitle("Setting title works");
+                 });
+
+          defaultValue: 'false'
+        refreshable:
+          type: boolean
+          fieldDescription: >+
+
+
+            Specify if the dashboard-item will control the refresh. When specified, Jira won't refresh the gadget. Refreshable
+            dashboard items should do custom refresh logic in the provided callback.
+
+                 AP.require(['jira'], function (jira) {
+                    jira.DashboardItem.onDashboardItemRefreshed(function() {
+                       // do custom refresh logic
+                    });
+                 });
+
+          defaultValue: 'false'
+        thumbnailUrl:
+          format: uri
+          type: string
+          fieldDescription: >+
+
+
+            URI of the dashboard item thumbnail which is displayed in the
+            directory.
+
+      definitions:
+        i18nProperty: *ref_0
+        singleCondition: *ref_1
+        compositeCondition: *ref_2
+    tags:
+      - forge
+  connect-jira:jiraWorkflowPostFunctions:
+    schema:
+      properties:
+        view:
+          $ref: '#/definitions/url'
+          fieldDescription: >+
+
+
+            The relative URL to the add-on page that shows the read-only
+            configuration or summary of the workflow post
+             function.
+
+             The view URL can contain the following context parameters:
+
+             - `postFunction.id`: The unique identifier of the post function
+             - `postFunction.config`: The configuration value saved to Jira after calling `WorkflowConfiguration.onSave`
+
+        triggered:
+          $ref: '#/definitions/url'
+          fieldDescription: >+
+
+
+            The relative URL to the add-on resource that receives the HTTP POST
+            after a workflow transition.
+             It includes the authentication headers that enable the add-on to validate the authenticity of the request.
+
+             Your app must return a success status code in response to the HTTP POST request.
+             If your app doesn't send a success status code the request will retry,
+             as described in the [webhook retry policy](../../webhooks#retry-policy).
+
+             <h3>Contents of the HTTP POST</h3>
+
+             To understand the type of content that is sent to the add-on after a state transition, you can use the Connect
+             inspector tool. The [Connect inspector](http://go.atlassian.com/connect-inspector) is a service that lets you
+             generate a temporary Atlassian Connect add-on that you can install in your Cloud development environment to inspect
+             the content of event messages.
+
+             Here is an example POST body. For brevity, some fields have been removed or truncated.
+
+                {
+                    "configuration": {
+                        "value": "Configuration from the post function edit page"
+                    },
+                    "issue": {
+                        "fields": {
+                            "assignee": { },
+                            "attachment": [],
+                            "comment": { },
+                            "components": [],
+                            "created": "2013-11-18T17:56:23.864+1100",
+                            "description": null,
+                            "duedate": null,
+                            "environment": null,
+                            "fixVersions": [],
+                            "issuetype": { },
+                            "labels": [],
+                            "lastViewed": "2013-11-18T17:56:31.793+1100",
+                            "priority": { },
+                            "project": {
+                                "avatarUrls": { },
+                                "id": "10000",
+                                "key": "TEST",
+                                "name": "Test"
+                            },
+                            "reporter": { },
+                            "resolution": { },
+                            "resolutiondate": "2013-11-18T17:56:31.799+1100",
+                            "status": { },
+                            "summary": "The issue summary",
+                            "updated": "2013-11-18T17:56:23.864+1100",
+                            "versions": [],
+                            "votes": { },
+                            "watches": { },
+                            "workratio": -1
+                        },
+                        "id": "10000",
+                        "key": "TEST-1",
+                        "self": "http://issues.example.com/jira/issue/10000"
+                    },
+                    "transition": {
+                        "from_status": "Open",
+                        "to_status": "Resolved",
+                        "transitionId": 5,
+                        "transitionName": "Resolve Issue",
+                        "workflowId": 10000,
+                        "workflowName": "classic default workflow"
+                    }
+                }
+
+        edit:
+          $ref: '#/definitions/url'
+          fieldDescription: >+
+
+
+            The relative URL to the add-on page that allows to configure the
+            workflow post function once it exists.
+
+             The edit URL can contain the following context parameters:
+
+             - `postFunction.id`: The unique identifier of the post function
+             - `postFunction.config`: The configuration value saved to Jira after calling `WorkflowConfiguration.onSave`
+
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        description:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: >+
+
+
+            The description of the workflow post function. This will be
+            presented to the user when they add a new post
+             function to a Jira workflow.
+
+        create:
+          $ref: '#/definitions/url'
+          fieldDescription: >+
+
+
+            The relative URL to the add-on page that allows to configure the
+            workflow post function on creation.
+
+      definitions:
+        url: *ref_6
+        i18nProperty: *ref_0
+    tags:
+      - forge
+  connect-jira:jiraIssueContents:
+    schema:
+      properties:
+        icon:
+          $ref: '#/definitions/icon'
+          fieldDescription: |+
+
+
+            Specifies an icon to show alongside the quick-add menu item.
+             The icon should be 24x24 pixels or larger, preferably in .SVG format.
+
+        tooltip:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            Specifies a tooltip for the quick-add menu item.
+
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        conditions:
+          items:
+            type: object
+            anyOf:
+              - $ref: '#/definitions/singleCondition'
+              - $ref: '#/definitions/compositeCondition'
+          type: array
+          fieldDescription: >+
+
+
+            <a href="../../conditions/">Conditions</a> can be added to display
+            only when all the given conditions are true.
+
+        target:
+          type: object
+          fieldDescription: >+
+
+
+            Specifies the target of this content as a result of clicking on the
+            menu item. Currently,
+             you can only display a web panel in the issue's content area.
+
+             Read about [Issue Page Target Web Panel](/cloud/jira/platform/modules/issue-page-target-web-panel/).
+
+          properties:
+            type:
+              enum:
+                - web_panel
+                - WEB_PANEL
+              type: string
+              fieldDescription: |+
+
+
+                The type field must be set to 'web_panel'
+
+            url:
+              format: uri
+              type: string
+              fieldDescription: >+
+
+
+                The URL of the add-on resource that provides the web panel
+                content.
+                 This URL must be relative to the app's baseUrl.
+
+          required:
+            - type
+            - url
+          shortClassName: issuePageTargetWebPanelBean
+          title: Issue Page Target Web Panel
+          description: >+
+
+
+            Describes the target of the issue content module. Supports
+            displaying a web panel in the content area of the issue view.
+
+        contentPresentConditions:
+          items:
+            type: object
+            anyOf:
+              - $ref: '#/definitions/compositeCondition'
+              - $ref: '#/definitions/singleCondition'
+          type: array
+          fieldDescription: >+
+
+
+            Specifies a list of [Conditions](/cloud/jira/platform/conditions/)
+            that, when resolved to true, will
+             force the content to always be displayed for that issue. Users have the ability to collapse the content
+             if they don't want to see it.
+
+        jiraNativeAppsEnabled:
+          type: boolean
+          fieldDescription: >+
+
+
+            This is coming soon. We will update the docs here with the minimum
+            supported Jira iOS and Android app versions
+             when it is ready.
+
+             Specifies whether the issue content module will be shown in the Jira mobile and desktop clients.
+
+          defaultValue: 'false'
+      definitions:
+        icon: *ref_3
+        i18nProperty: *ref_0
+        singleCondition: *ref_1
+        compositeCondition: *ref_2
+    tags:
+      - forge
+  connect-jira:jiraDevelopmentTool:
+    schema:
+      properties:
+        capabilities:
+          items:
+            enum:
+              - commit
+              - COMMIT
+              - branch
+              - BRANCH
+              - pull_request
+              - PULL_REQUEST
+            type: string
+          type: array
+          fieldDescription: |+
+
+
+            What development information the tool offers
+
+        application:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            The application behind this development tool
+
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        actions:
+          $ref: '#/definitions/developmentToolModuleActionsBean'
+          fieldDescription: >+
+
+
+            Optional actions that can be performed by Jira users, e.g., create
+            branch, etc.
+
+        url:
+          type: string
+          fieldDescription: |+
+
+
+            A URL to the development tool
+
+        logoUrl:
+          type: string
+          fieldDescription: >+
+
+
+            The logo for the development tool, will be displayed in an area 16
+            by 16 pixels
+
+      definitions:
+        i18nProperty: *ref_0
+        developmentToolModuleActionsBean:
+          properties:
+            createBranch:
+              properties:
+                templateUrl:
+                  type: string
+                  fieldDescription: |+
+
+
+              required:
+                - templateUrl
+              shortClassName: developmentToolModuleActionBean
+              type: object
+              description: >+
+
+
+                <p>Defines the URL template that is used when an action is
+                invoked. The following context parameters are supported:
+                <code>{issue.key}</code>, <code>{issue.summary}</code>.</p>
+
+              fieldDescription: |+
+
+
+          shortClassName: developmentToolModuleActionsBean
+          type: object
+          title: Development Actions
+          description: >+
+
+
+            <p>Development actions that can be performed by Jira users.</p>
+
+            <p>Each action is optional (unless indicated otherwise). The absence
+            of an action indicates that the action is not supported by the
+            provider.</p>
+
+    tags:
+      - forge
+  connect-jira:jiraProjectTabPanels:
+    schema:
+      properties: *ref_7
+      definitions:
+        i18nProperty: *ref_0
+        singleCondition: *ref_1
+    tags:
+      - forge
+  connect-jira:jiraGlobalPermissions:
+    schema:
+      properties:
+        defaultGrants:
+          items:
+            enum:
+              - none
+              - NONE
+              - jira-administrators
+              - JIRA-ADMINISTRATORS
+              - all
+              - ALL
+            type: string
+          type: array
+          fieldDescription: >+
+
+
+            Specifies group of users that will be granted this permissions when
+            the add-on is first installed.
+
+             Allowed values:
+
+              * `NONE` - Permission will not be granted to anyone by default
+              * `ALL`  -  If `anonymousAllowed` is set to true, every user, both logged in and anonymous, will be granted the permission.
+                        Otherwise, permission will be granted to every user with application role assigned.
+              * `JIRA-ADMINISTRATORS` - Every user with jira administration permission will be granted this permission.
+
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        description:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: >+
+
+
+            Description of the global permission. It will be displayed under the
+            permission's name.
+
+        anonymousAllowed:
+          type: boolean
+          fieldDescription: |+
+
+
+            Specifies if this permission can be granted to anonymous users.
+
+          defaultValue: 'true'
+      definitions:
+        i18nProperty: *ref_0
+    tags:
+      - forge
+  connect-jira:jiraIssueFields:
+    schema:
+      properties:
+        template:
+          properties:
+            type:
+              enum:
+                - link
+                - LINK
+              type: string
+              fieldDescription: |+
+
+
+                Type of the template.
+
+            url:
+              type: string
+              fieldDescription: |+
+
+
+                <p>
+                     If the type is 'link' then this specifies the URL template for the link.
+                     It is possible to use <a href="../../context-parameters/">context parameters</a> in the template.
+                 </p>
+
+                 <p>
+                     The URL may be relative or absolute. If it is the former, then the Jira context path will be prepended automatically.
+                 </p>
+
+                 <p>
+                     The following context parameters are available:
+                     <ul>
+                         <li>option.id, option.key, option.properties</li>
+                         <li>issue.id, issue.key</li>
+                         <li>project.id, project.key</li>
+                         <li>user.id (deprecated), user.name (deprecated), user.accountId</li>
+                     </ul>
+
+          required:
+            - type
+            - url
+          shortClassName: issueFieldTemplateBean
+          type: object
+          title: Issue Field Template
+          description: >+
+
+
+            Defines the template used to render issue field options in the UI
+            view.
+
+          fieldDescription: >+
+
+
+            The template used to render options. This is only valid when the
+            `type` is `single_select` or `multi_select`.
+
+        property:
+          properties:
+            path:
+              type: string
+              fieldDescription: |+
+
+
+                The path to the value in the JSON object.
+
+                 For instance, for JSON <code>"{"label": {"color": "red", "text":"connect"}}</code> the valid path
+                 referencing the color is <code>label.color</code>.
+
+            type:
+              enum:
+                - number
+                - NUMBER
+                - string
+                - STRING
+                - date
+                - DATE
+              type: string
+              fieldDescription: >+
+
+
+                The type of the referenced value. It will affect how the value
+                is interpreted and displayed,
+                 and how the field behaves in JQL.
+
+                 The type can be one of the following:
+
+                 * `number`, which is displayed as a number and allows the range ordering and searching on this field.
+                 * `string`, which supports a string, for example <code>"example text"</code>, and a list of strings, for example <code>["example text1", "example text2"]</code>.
+                             The string is displayed as is and enables a search for matching phrases. The list is displayed as comma-separated values and enables a search for matches to any phrase from the list.
+                 * `date`, which is displayed as a date with time and allows date-based searching.
+
+                    The value is expected to be a date string in one of the following formats:
+                      * [YYYY]-[MM]-[DD]
+                      * [YYYY]-[MM]-[DD]T[hh]:[mm]Z
+                      * [YYYY]-[MM]-[DD]T[hh]:[mm]+[hh]:[mm]
+                      * [YYYY]-[MM]-[DD]T[hh]:[mm]-[hh]:[mm]
+
+                   See [ISO_8601 standard](http://www.w3.org/TR/NOTE-datetime) for reference.
+
+            key:
+              type: string
+              fieldDescription: |+
+
+
+                The key of the issue property.
+
+          required:
+            - path
+            - type
+            - key
+          shortClassName: issueFieldPropertyBean
+          type: object
+          title: Issue Field Property
+          description: >+
+
+
+            Defines an issue property that will store the value for the issue
+            field of the `read_only` type.
+
+             <p><b>Example</b></p>
+
+
+
+
+
+                {
+                  "path": "comments.count",
+                  "key": "statistics",
+                  "type": "number"
+                }
+
+
+          fieldDescription: |+
+
+
+            The property that stores the field value.
+
+             Required when the `type` is `read_only`, otherwise not used.
+
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        description:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: >+
+
+
+            Description of the issue field. This will be displayed for the user
+            under the field in the create or edit issue view.
+
+        type:
+          enum:
+            - string
+            - STRING
+            - text
+            - TEXT
+            - rich_text
+            - RICH_TEXT
+            - single_select
+            - SINGLE_SELECT
+            - multi_select
+            - MULTI_SELECT
+            - number
+            - NUMBER
+            - read_only
+            - READ_ONLY
+          type: string
+          fieldDescription: |+
+
+
+            The type of the field. The following types are available:
+
+             * `number` Allows to set a number.
+             * `string` Allows to set a string, supports exact matches in JQL.
+             * `text` Allows to set a string, supports fuzzy search in JQL (with the "~" operator).
+             * `rich_text` Allows to set multi-line text in Jira, and supports fuzzy search in JQL. Note: If you migrate from `text` to `rich_text` for an already existing field, the data won't be migrated.
+             * `single_select` Allows to select one value from a predefined set. The [Issue field options](/cloud/jira/platform/rest/v2/#api-group-Issue-field-options) REST API can be user to manage available values.
+             * `multi_select` Allows to select multiple values from a predefined set. The [Issue field options](/cloud/jira/platform/rest/v2/#api-group-Issue-field-options) REST API can be used to manage available values.
+             * `read_only` Displays a given issue property, not editable by users.
+
+        extractions:
+          items:
+            properties:
+              path:
+                type: string
+                fieldDescription: |+
+
+
+                  The path to the JSON data which is supposed to be indexed.
+
+                   For instance, for JSON <code>"{"label": {"color": "red", "text":"connect"}}</code> the valid path
+                   referencing the color is label.color.
+
+                   Currently, specifying of index for JSON arrays and first level JSON (such as "true") is not supported.
+                   The JSON needs to be an object with properties.
+
+              name:
+                type: string
+                fieldDescription: >+
+
+
+                  The name, under which this property will be searchable with
+                  JQL. If not given, the <pre>path</pre> will be used.
+                   For a field with name Field Name, and an extraction with name ExtractionName the resulting query string will be
+                   "Field Name".ExtractionName.
+
+              type:
+                enum:
+                  - number
+                  - NUMBER
+                  - text
+                  - TEXT
+                  - string
+                  - STRING
+                  - user
+                  - USER
+                  - date
+                  - DATE
+                type: string
+                fieldDescription: |+
+
+
+                  The type of the referenced value.
+
+                   The type can be one of the following values:
+
+                   * `number`, which is indexed as a number and allows the range ordering and searching on this field.
+                   * `text`, which is tokenized before indexing and allows searching for particular words.
+                   * `string` which is indexed as is and allows searching for the exact phrase only.
+                   * `user`, which is indexed as a user and allows user-based searching. The expected value is an _account ID_ string (a universal Atlassian user identifier).
+                   * `date`, which is indexed as a date with time and allows date-based searching.
+
+                      The value is expected to be a date string in one of the following formats:
+                        * [YYYY]-[MM]-[DD]
+                        * [YYYY]-[MM]-[DD]T[hh]:[mm]Z
+                        * [YYYY]-[MM]-[DD]T[hh]:[mm]+[hh]:[mm]
+                        * [YYYY]-[MM]-[DD]T[hh]:[mm]-[hh]:[mm]
+
+                     See [ISO_8601 standard](http://www.w3.org/TR/NOTE-datetime) for reference.
+
+            required:
+              - path
+              - type
+            shortClassName: issueFieldValueExtractionBean
+            type: object
+            title: Issue Field Option Property Index
+            description: >+
+
+
+              Defines an issue field option property to be indexed by Jira. An
+              option can contain an additional properties object.
+               In this bean, you can define which properties will be extracted, so that a user will be able to search for issues which have options set that have a certain property.
+
+               <p>
+                   Note that `multi_select` fields may have more than one option selected. In that case, properties from all options
+                   are indexed. Each Option's properties should have the same structure to be indexed properly, i.e. the types of values
+                   across all options' properties should not differ. If they do, Jira will still try to act smart and do the most reasonable thing,
+                   but the results are not guaranteed.
+               </p>
+
+               <p><b>Example</b></p>
+
+
+
+
+
+                  {
+                    "path": "category",
+                    "type": "text",
+                    "name": "categoryName"
+                  }
+
+
+          type: array
+          fieldDescription: >+
+
+
+            Extractions used for JQL search. This is valid only when the `type`
+            is `single_select` or `multi_select`.
+
+      definitions:
+        i18nProperty: *ref_0
+    tags:
+      - forge
+  connect-jira:jiraIssueTypes:
+    schema:
+      properties:
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+        description:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            Description of the issue type.
+             Currently it does not support i18n
+
+        type:
+          enum:
+            - standard
+            - STANDARD
+            - subtask
+            - SUBTASK
+          type: string
+          fieldDescription: |+
+
+
+            Type of issue-type standard or subtask
+
+      definitions:
+        i18nProperty: *ref_0
+    tags:
+      - forge
+  connect-jira:jiraTimeTrackingProviders:
+    schema:
+      properties:
+        adminPageKey:
+          type: string
+          fieldDescription: >+
+
+
+            If provided, this needs to reference an existing `adminPage` module
+            defined by the same add-on.
+             Jira will link the referenced `adminPage` module as the configuration page of this time tracking module.
+
+        name:
+          $ref: '#/definitions/i18nProperty'
+          fieldDescription: |+
+
+
+            A human readable name.
+
+      definitions:
+        i18nProperty: *ref_0
+    tags:
+      - forge
+  connect-jira:lifecycle:
+    schema:
+      properties:
+        installed:
+          format: uri
+          type: string
+          fieldDescription: >+
+
+
+            When a Connect add-on is installed, a synchronous request is fired
+            to this URL to initiate the installation
+             handshake. In order to successfully complete installation, the add-on must respond with either a
+             <code>200 OK</code> or <code>204 No Content</code> status.
+
+            <div class="aui-message warning">
+                <p class="title">
+                    <span class="aui-icon icon-warning">Warning</span>
+                    <strong>Important</strong>
+                </p>
+                Upon successful registration, the add-on must return either a <code>200 OK</code> or <code>204 No Content</code>
+                response code, otherwise the operation will fail and the installation will be marked as incomplete.
+            </div>
+
+        disabled:
+          format: uri
+          type: string
+          fieldDescription: >+
+
+
+            Fires when an add on has been successfully disabled. This is an
+            asynchronous notification event.
+
+        dare-migration:
+          type: string
+          fieldDescription: |+
+
+
+            Used DaRe app migration service to trigger migrations events
+
+        uninstalled:
+          format: uri
+          type: string
+          fieldDescription: >+
+
+
+            Fires when an add on has been successfully un-installed. This is an
+            asynchronous notification event.
+
+        enabled:
+          format: uri
+          type: string
+          fieldDescription: >+
+
+
+            Fires when an add on has been successfully enabled. This is an
+            asynchronous notification event.
+
+    tags:
+      - forge
