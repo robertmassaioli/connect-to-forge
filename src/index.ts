@@ -35,10 +35,9 @@ program
   .requiredOption('-u, --url <url>', 'Atlassian Connect descriptor URL')
   .option('-t, --type <type>', 'App type (jira or confluence)')
   .option('-o, --output <path>', 'Output file path', 'manifest.yml')
-  .option('-w, --fail-on-warning', 'Fail on warning')
   .parse(process.argv);
 
-const { url, type, output, failOnWarning } = program.opts();
+const { url, type, output } = program.opts();
 
 // Helper function to download Atlassian Connect descriptor
 async function downloadConnectDescriptor(url: string): Promise<ConnectDescriptor> {
@@ -95,7 +94,8 @@ function convertToForgeManifest(connect: ConnectDescriptor, type: 'jira' | 'conf
 
   // Add scopes
   connect.scopes.forEach(scope => {
-    if (scope === 'ACT_AS_USER') {
+    console.log(`Scope: ${scope}`);
+    if (scope.toLocaleLowerCase() === 'act_as_user') {
       warnings.push('ACT_AS_USER scope is not supported in Forge manifest.');
     } else {
       let forgeScope = scope.toLowerCase().replace('_', '-');
@@ -110,7 +110,7 @@ async function main() {
   const connectDescriptor = await downloadConnectDescriptor(url);
   const [forgeManifest, warnings] = convertToForgeManifest(connectDescriptor, type as 'jira' | 'confluence');
 
-  if (warnings.length > 0 && failOnWarning) {
+  if (warnings.length > 0) {
     console.warn('Warnings detected:');
     warnings.forEach(warning => console.warn(`- ${warning}`));
 

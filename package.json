@@ -14,6 +14,6 @@
     "ts-is-present": "^1.2.2"
   },
   "scripts": {
-    "start": "ts-node --esm src/index.ts --type confluence --url https://marketplace-cdn.atlassian.com/files/1.0.9-AC/f6a07321-b8c8-4152-a7fe-2a5c8da40f74"
+    "start": "ts-node --esm src/index.ts --type confluence --url"
   }
 }
