@@ -83,7 +83,7 @@ function convertToForgeManifest(connect: ConnectDescriptor, type: 'jira' | 'conf
   // Add lifecycle events
   if (connect.lifecycle) {
     const moduleName = `${type}:lifecycle`;
-    manifest.connectModules[moduleName] = { key: 'lifecycle-events', ...connect.lifecycle };
+    manifest.connectModules[moduleName] = [{ key: 'lifecycle-events', ...connect.lifecycle }];
     console.log(` - Moved all lifecycle events into connectModules.${moduleName}.`);
     manifest.app.connect.authentication = 'jwt';
   }
