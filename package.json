@@ -1,4 +1,11 @@
 {
+  "name": "connect-to-forge",
+  "version": "1.0.0",
+  "description": "Converts an Atlassian Connect Descritor to a connect-on-forge manifest.",
+  "main": "dist/index",
+  "bin": {
+    "connect-to-forge": "./dist/connect-to-forge.js"
+  },
   "devDependencies": {
     "@types/inquirer": "^9.0.3",
     "@types/js-yaml": "^4.0.5",
