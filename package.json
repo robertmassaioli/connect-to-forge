@@ -6,12 +6,21 @@
   "bin": {
     "connect-to-forge": "./dist/connect-to-forge.js"
   },
+  "author": "Robert Massaioli <connect-on-forge@rmdir.app>",
+  "license": "MIT",
+  "files": [
+    "dist/**/*",
+    "README.md"
+  ],
   "devDependencies": {
     "@types/inquirer": "^9.0.3",
     "@types/js-yaml": "^4.0.5",
     "@types/node": "^20.4.2",
+    "ts-loader": "^9.4.4",
     "ts-node": "^10.9.1",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
     "axios": "^1.4.0",
@@ -21,6 +30,8 @@
     "ts-is-present": "^1.2.2"
   },
   "scripts": {
-    "start": "ts-node --esm src/index.ts"
+    "start": "ts-node --esm src/index.ts",
+    "build": "tsc -p ./tsconfig.json",
+    "prepack": "webpack --mode production --config webpack.config.js"
   }
 }
