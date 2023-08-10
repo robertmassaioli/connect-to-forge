@@ -59,7 +59,7 @@ async function downloadConnectDescriptor(url: string): Promise<ConnectDescriptor
 function convertToForgeManifest(connect: ConnectDescriptor, type: 'jira' | 'confluence'): [ForgeManifest, string[]] {
   let manifest: ForgeManifest = {
     app: {
-      id: 'ari:cloud:ecosystem::app/invalid-run-forge-register',
+      id: 'ari:cloud:ecosystem::app/invalid-run-forge-register', // A dummy id is required for the 'forge register' command to work.
       connect: {
         key: connect.key,
         remote: 'connect'
