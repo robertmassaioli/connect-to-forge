@@ -19,6 +19,7 @@ interface ConnectDescriptor {
 // Typings for Forge Manifest
 interface ForgeManifest {
   app: {
+    id: string;
     connect: {
       key: string;
       authentication?: string;
@@ -58,6 +59,7 @@ async function downloadConnectDescriptor(url: string): Promise<ConnectDescriptor
 function convertToForgeManifest(connect: ConnectDescriptor, type: 'jira' | 'confluence'): [ForgeManifest, string[]] {
   let manifest: ForgeManifest = {
     app: {
+      id: 'ari:cloud:ecosystem::app/invalid-run-forge-register',
       connect: {
         key: connect.key,
         remote: 'connect'
