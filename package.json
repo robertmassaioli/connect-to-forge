@@ -31,6 +31,8 @@
   },
   "scripts": {
     "start": "ts-node --esm src/index.ts",
+    "start-jira": "ts-node --esm src/index.ts --type jira --url",
+    "start-conf": "ts-node --esm src/index.ts --type confluence --url",
     "build": "tsc -p ./tsconfig.json",
     "prepack": "webpack --mode production --config webpack.config.js"
   }

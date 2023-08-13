@@ -14,6 +14,9 @@ interface ConnectDescriptor {
   scopes: string[];
   lifecycle?: Record<string, string>;
   modules: Record<string, any>;
+  translations?: object;
+  regionBaseUrls?: object;
+  cloudAppMigration?: object;
 }
 
 // Typings for Forge Manifest
@@ -93,7 +96,10 @@ function convertToForgeManifest(connect: ConnectDescriptor, type: 'jira' | 'conf
   // Add modules
   if (connect.modules) {
     for (const [moduleType, moduleContent] of Object.entries(connect.modules)) {
-      manifest.connectModules[`${type}:${moduleType}`] = moduleContent;
+      if (isPresent(moduleContent)) {
+        // There are no singleton modules in a Forge Manifest, so anything that is not an array needs to be turned into one.
+        manifest.connectModules[`${type}:${moduleType}`] = Array.isArray(moduleContent) ? moduleContent : [moduleContent];
+      }
     }
     console.log(` - Moved ${Object.keys(connect.modules).length} modules into connectModules in the Manifest`);
   }
@@ -118,6 +124,19 @@ function convertToForgeManifest(connect: ConnectDescriptor, type: 'jira' | 'conf
       }
     });
     console.log(` - Converted ${connect.scopes.length} connect scopes into correct format in manifest.`);
+  }
+
+  // Check for translations
+  if(isPresent(connect.translations)) {
+    warnings.push(`Found 'translations' in Connect Descriptor. Translations for 'connectModules' not yet supported in Forge Manifest and will not be copied over.`);
+  }
+
+  if(isPresent(connect.regionBaseUrls)) {
+    warnings.push(`Found 'regionBaseUrls' in Connect Descriptor. Data Residency not Connect not yet supported in a Forge Manifest.`);
+  }
+
+  if(isPresent(connect.cloudAppMigration)) {
+    warnings.push(`Found 'cloudAppMigration' in Connect Descriptor. App Migration Platform not yet supported in a Forge Manifest.`);
   }
 
   console.log('');
