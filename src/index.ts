@@ -172,6 +172,9 @@ async function main() {
   const manifestYaml = yaml.dump(forgeManifest);
   fs.writeFileSync(output, manifestYaml);
   console.log(`Forge manifest generated and saved to ${output}`);
+  console.log('');
+  console.log('To continue your journey by registering and deploying this app, please go to:');
+  console.log('https://developer.atlassian.com/platform/adopting-forge-from-connect/how-to-adopt/#part-3--register-and-deploy-your-app-to-forge');
 }
 
 main().catch(e => {
