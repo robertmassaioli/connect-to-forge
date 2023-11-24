@@ -117,7 +117,7 @@ function convertToForgeManifest(connect: ConnectDescriptor, type: 'jira' | 'conf
   if(isPresent(connect.scopes) && connect.scopes.length > 0) {
     connect.scopes.forEach(scope => {
       if (scope.toLocaleLowerCase() === 'act_as_user') {
-        warnings.push('ACT_AS_USER scope is not supported in Forge manifest.');
+        warnings.push('ACT_AS_USER scope (Offline user impersonation) is not currently supported in Forge manifest.');
       } else {
         let forgeScope = scope.toLowerCase().replace('_', '-');
         manifest.permissions.scopes.push(`${forgeScope}:connect-${type}`);
@@ -128,15 +128,15 @@ function convertToForgeManifest(connect: ConnectDescriptor, type: 'jira' | 'conf
 
   // Check for translations
   if(isPresent(connect.translations)) {
-    warnings.push(`Found 'translations' in Connect Descriptor. Translations for 'connectModules' not yet supported in Forge Manifest and will not be copied over.`);
+    warnings.push(`Found 'translations' in Connect Descriptor. Translations for 'connectModules' not currently supported in Forge Manifest and will not be copied over.`);
   }
 
   if(isPresent(connect.regionBaseUrls)) {
-    warnings.push(`Found 'regionBaseUrls' in Connect Descriptor. Data Residency not Connect not yet supported in a Forge Manifest.`);
+    warnings.push(`Found 'regionBaseUrls' in Connect Descriptor. Data Residency not Connect not currently supported in a Forge Manifest.`);
   }
 
   if(isPresent(connect.cloudAppMigration)) {
-    warnings.push(`Found 'cloudAppMigration' in Connect Descriptor. App Migration Platform not yet supported in a Forge Manifest.`);
+    warnings.push(`Found 'cloudAppMigration' in Connect Descriptor. App Migration Platform not currently supported in a Forge Manifest.`);
   }
 
   console.log('');
@@ -151,6 +151,9 @@ async function main() {
   if (warnings.length > 0) {
     console.warn('Warnings detected:');
     warnings.forEach(warning => console.warn(`- ${warning}`));
+    console.warn('');
+    console.warn(`For more information about these limitations: https://developer.atlassian.com/platform/adopting-forge-from-connect/limitations-and-differences/#incompatibilities`);
+    console.warn('');
 
     const { proceed } = await inquirer.prompt([
       {
