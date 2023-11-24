@@ -19,8 +19,8 @@ interface ConnectDescriptor {
   cloudAppMigration?: object;
 }
 
-// Typings for Forge Manifest
-interface ForgeManifest {
+// Typings for Forge manifest
+interface Forgemanifest {
   app: {
     id: string;
     connect: {
@@ -47,6 +47,15 @@ program
 
 const { url, type, output } = program.opts();
 
+const UNSUPPORTED_MODULES = new Set([
+  "jiraBuildInfoProvider",
+  "jiraDeploymentInfoProvider",
+  "jiraDevelopmentTool",
+  "jiraFeatureFlagInfoProvider",
+  "jiraRemoteLinkInfoProvider",
+  "jiraSecurityInfoProvider",
+]);
+
 // Helper function to download Atlassian Connect descriptor
 async function downloadConnectDescriptor(url: string): Promise<ConnectDescriptor> {
   try {
@@ -58,9 +67,9 @@ async function downloadConnectDescriptor(url: string): Promise<ConnectDescriptor
   }
 }
 
-// Helper function to convert Atlassian Connect descriptor to Forge Manifest
-function convertToForgeManifest(connect: ConnectDescriptor, type: 'jira' | 'confluence'): [ForgeManifest, string[]] {
-  let manifest: ForgeManifest = {
+// Helper function to convert Atlassian Connect descriptor to Forge manifest
+function convertToForgemanifest(connect: ConnectDescriptor, type: 'jira' | 'confluence'): [Forgemanifest, string[]] {
+  let manifest: Forgemanifest = {
     app: {
       id: 'ari:cloud:ecosystem::app/invalid-run-forge-register', // A dummy id is required for the 'forge register' command to work.
       connect: {
@@ -97,12 +106,19 @@ function convertToForgeManifest(connect: ConnectDescriptor, type: 'jira' | 'conf
   if (connect.modules) {
     for (const [moduleType, moduleContent] of Object.entries(connect.modules)) {
       if (isPresent(moduleContent)) {
-        // There are no singleton modules in a Forge Manifest, so anything that is not an array needs to be turned into one.
+        // There are no singleton modules in a Forge manifest, so anything that is not an array needs to be turned into one.
         manifest.connectModules[`${type}:${moduleType}`] = Array.isArray(moduleContent) ? moduleContent : [moduleContent];
       }
     }
-    console.log(` - Moved ${Object.keys(connect.modules).length} modules into connectModules in the Manifest`);
+    console.log(` - Moved ${Object.keys(connect.modules).length} modules into connectModules in the manifest`);
   }
+
+  // Check for unsupported modules
+
+
+  const foundUnsupportedModules = Object.keys(connect.modules).filter(module => UNSUPPORTED_MODULES.has(module));
+  warnings.push(...foundUnsupportedModules.map(unsupportedModule => `${unsupportedModule} is not currently supported in a Forge manifest.`))
+
 
   // Add webhooks with keys
   const webhooks = connect.modules.webhooks;
@@ -117,7 +133,7 @@ function convertToForgeManifest(connect: ConnectDescriptor, type: 'jira' | 'conf
   if(isPresent(connect.scopes) && connect.scopes.length > 0) {
     connect.scopes.forEach(scope => {
       if (scope.toLocaleLowerCase() === 'act_as_user') {
-        warnings.push('ACT_AS_USER scope (Offline user impersonation) is not currently supported in Forge manifest.');
+        warnings.push('ACT_AS_USER scope (Offline user impersonation) is not currently supported in a Forge manifest.');
       } else {
         let forgeScope = scope.toLowerCase().replace('_', '-');
         manifest.permissions.scopes.push(`${forgeScope}:connect-${type}`);
@@ -128,15 +144,15 @@ function convertToForgeManifest(connect: ConnectDescriptor, type: 'jira' | 'conf
 
   // Check for translations
   if(isPresent(connect.translations)) {
-    warnings.push(`Found 'translations' in Connect Descriptor. Translations for 'connectModules' not currently supported in Forge Manifest and will not be copied over.`);
+    warnings.push(`Found 'translations' in Connect Descriptor. Translations for 'connectModules' not currently supported in Forge manifest and will not be copied over.`);
   }
 
   if(isPresent(connect.regionBaseUrls)) {
-    warnings.push(`Found 'regionBaseUrls' in Connect Descriptor. Data Residency not Connect not currently supported in a Forge Manifest.`);
+    warnings.push(`Found 'regionBaseUrls' in Connect Descriptor. Data Residency not Connect not currently supported in a Forge manifest.`);
   }
 
   if(isPresent(connect.cloudAppMigration)) {
-    warnings.push(`Found 'cloudAppMigration' in Connect Descriptor. App Migration Platform not currently supported in a Forge Manifest.`);
+    warnings.push(`Found 'cloudAppMigration' in Connect Descriptor. App Migration Platform not currently supported in a Forge manifest.`);
   }
 
   console.log('');
@@ -146,7 +162,7 @@ function convertToForgeManifest(connect: ConnectDescriptor, type: 'jira' | 'conf
 
 async function main() {
   const connectDescriptor = await downloadConnectDescriptor(url);
-  const [forgeManifest, warnings] = convertToForgeManifest(connectDescriptor, type as 'jira' | 'confluence');
+  const [forgemanifest, warnings] = convertToForgemanifest(connectDescriptor, type as 'jira' | 'confluence');
 
   if (warnings.length > 0) {
     console.warn('Warnings detected:');
@@ -169,7 +185,7 @@ async function main() {
     }
   }
 
-  const manifestYaml = yaml.dump(forgeManifest);
+  const manifestYaml = yaml.dump(forgemanifest);
   fs.writeFileSync(output, manifestYaml);
   console.log(`Forge manifest generated and saved to ${output}`);
   console.log('');
