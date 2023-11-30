@@ -1,10 +1,11 @@
-import fs from 'fs';
+import fs, { existsSync } from 'fs';
 import axios from 'axios';
 import yaml from 'js-yaml';
 import { program } from 'commander';
 import inquirer from 'inquirer';
 import { error } from 'console';
 import { isPresent } from 'ts-is-present';
+import merge from 'deepmerge';
 
 // Typings for Atlassian Connect Descriptor
 interface ConnectDescriptor {
@@ -20,7 +21,7 @@ interface ConnectDescriptor {
 }
 
 // Typings for Forge manifest
-interface Forgemanifest {
+interface ForgeManifest {
   app: {
     id: string;
     connect: {
@@ -67,9 +68,20 @@ async function downloadConnectDescriptor(url: string): Promise<ConnectDescriptor
   }
 }
 
-// Helper function to convert Atlassian Connect descriptor to Forge manifest
-function convertToForgemanifest(connect: ConnectDescriptor, type: 'jira' | 'confluence'): [Forgemanifest, string[]] {
-  let manifest: Forgemanifest = {
+function loadExistingManifest(outputFilename: string): ForgeManifest | null {
+  try {
+    const result = yaml.load(fs.readFileSync(outputFilename).toString('utf8'));
+    console.log(`Existing ${outputFilename} file detected, will merge your Connect Modules in.`);
+    return result as ForgeManifest;
+  } catch (e) {
+    console.log(`No existing ${outputFilename} file detected`);
+  }
+
+  return null;
+}
+
+function genDefaultManifest(connect: ConnectDescriptor): ForgeManifest {
+  return {
     app: {
       id: 'ari:cloud:ecosystem::app/invalid-run-forge-register', // A dummy id is required for the 'forge register' command to work.
       connect: {
@@ -88,7 +100,10 @@ function convertToForgemanifest(connect: ConnectDescriptor, type: 'jira' | 'conf
       scopes: []
     }
   };
+}
 
+// Helper function to convert Atlassian Connect descriptor to Forge manifest
+function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectDescriptor, type: 'jira' | 'confluence'): [ForgeManifest, string[]] {
   let warnings: string[] = [];
 
   console.log(`Conversion begun for '${connect.name}':`);
@@ -162,7 +177,12 @@ function convertToForgemanifest(connect: ConnectDescriptor, type: 'jira' | 'conf
 
 async function main() {
   const connectDescriptor = await downloadConnectDescriptor(url);
-  const [forgemanifest, warnings] = convertToForgemanifest(connectDescriptor, type as 'jira' | 'confluence');
+  let [forgeManifest, warnings] = convertToForgemanifest(genDefaultManifest(connectDescriptor), connectDescriptor, type as 'jira' | 'confluence');
+
+  const existingManifest = loadExistingManifest(output);
+  if (isPresent(existingManifest)) {
+    forgeManifest = merge(forgeManifest, existingManifest);
+  }
 
   if (warnings.length > 0) {
     console.warn('Warnings detected:');
@@ -185,7 +205,8 @@ async function main() {
     }
   }
 
-  const manifestYaml = yaml.dump(forgemanifest);
+  // console.log('result', JSON.stringify(forgeManifest, null ,2));
+  const manifestYaml = yaml.dump(forgeManifest);
   fs.writeFileSync(output, manifestYaml);
   console.log(`Forge manifest generated and saved to ${output}`);
   console.log('');
