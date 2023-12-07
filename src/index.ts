@@ -74,8 +74,9 @@ function loadExistingManifest(outputFilename: string): ForgeManifest | null {
     console.log(`Existing ${outputFilename} file detected, will merge your Connect Modules in.`);
     return result as ForgeManifest;
   } catch (e) {
-    console.log(`No existing ${outputFilename} file detected`);
+    console.log(`No existing ${outputFilename} file detected, will create one.`);
   }
+  console.log('');
 
   return null;
 }
@@ -147,10 +148,10 @@ function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectDescrip
   // Add scopes
   if(isPresent(connect.scopes) && connect.scopes.length > 0) {
     connect.scopes.forEach(scope => {
-      if (scope.toLocaleLowerCase() === 'act_as_user') {
-        warnings.push('ACT_AS_USER scope (Offline user impersonation) is not currently supported in a Forge manifest.');
+      if (type === 'confluence' && scope.toLocaleLowerCase() === 'act_as_user') {
+        warnings.push('ACT_AS_USER scope (Offline user impersonation) is not currently supported in a Forge manifest for a Confluence App.');
       } else {
-        let forgeScope = scope.toLowerCase().replace('_', '-');
+        const forgeScope = scope.toLowerCase().replace(/_/g, '-');
         manifest.permissions.scopes.push(`${forgeScope}:connect-${type}`);
       }
     });
