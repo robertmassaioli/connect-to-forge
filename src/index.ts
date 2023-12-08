@@ -177,7 +177,7 @@ function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectDescrip
   return [manifest, warnings];
 }
 
-type ExpectedAction = 'Override' | 'Abort' | 'Merge';
+type ExpectedAction = 'Override' | 'Abort';
 
 async function main() {
   const connectDescriptor = await downloadConnectDescriptor(url);
@@ -191,14 +191,11 @@ async function main() {
           type: 'list',
           name: 'action',
           message: 'We have detected that you already have a app.connect section in your manifest.yml. How do you want your manifest.yml to be modified?',
-          choices: ['Override', 'Abort', 'Merge'],
+          choices: ['Override', 'Abort'],
         }
       ]);
 
-      if (answers.action === 'Merge') {
-        console.log('Merging the Connect Descriptor into your Forge Manifest.');
-        forgeManifest = merge(forgeManifest, existingManifest);
-      } else if (answers.action === 'Abort') {
+      if (answers.action === 'Abort') {
         console.error('Aborting as requested!');
         process.exit(0);
       } else if (answers.action === 'Override') {
