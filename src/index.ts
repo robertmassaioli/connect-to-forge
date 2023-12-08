@@ -1,4 +1,4 @@
-import fs, { existsSync } from 'fs';
+import fs from 'fs';
 import axios from 'axios';
 import yaml from 'js-yaml';
 import { program } from 'commander';
@@ -72,11 +72,12 @@ function loadExistingManifest(outputFilename: string): ForgeManifest | null {
   try {
     const result = yaml.load(fs.readFileSync(outputFilename).toString('utf8'));
     console.log(`Existing ${outputFilename} file detected, will merge your Connect Modules in.`);
+    console.log('');
     return result as ForgeManifest;
   } catch (e) {
     console.log(`No existing ${outputFilename} file detected, will create one.`);
+    console.log('');
   }
-  console.log('');
 
   return null;
 }
@@ -176,13 +177,38 @@ function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectDescrip
   return [manifest, warnings];
 }
 
+type ExpectedAction = 'Override' | 'Abort' | 'Merge';
+
 async function main() {
   const connectDescriptor = await downloadConnectDescriptor(url);
   let [forgeManifest, warnings] = convertToForgemanifest(genDefaultManifest(connectDescriptor), connectDescriptor, type as 'jira' | 'confluence');
 
   const existingManifest = loadExistingManifest(output);
   if (isPresent(existingManifest)) {
-    forgeManifest = merge(forgeManifest, existingManifest);
+    if (isPresent(existingManifest?.app?.connect)) {
+      const answers = await inquirer.prompt<{ action: ExpectedAction }>([
+        {
+          type: 'list',
+          name: 'action',
+          message: 'We have detected that you already have a app.connect section in your manifest.yml. How do you want your manifest.yml to be modified?',
+          choices: ['Override', 'Abort', 'Merge'],
+        }
+      ]);
+
+      if (answers.action === 'Merge') {
+        console.log('Merging the Connect Descriptor into your Forge Manifest.');
+        forgeManifest = merge(forgeManifest, existingManifest);
+      } else if (answers.action === 'Abort') {
+        console.error('Aborting as requested!');
+        process.exit(0);
+      } else if (answers.action === 'Override') {
+        console.log('Overriding your existing manifest with a freshly generated one based on the Connect Descriptor.');
+      }
+
+      console.log('');
+    } else {
+      forgeManifest = merge(forgeManifest, existingManifest);
+    }
   }
 
   if (warnings.length > 0) {
