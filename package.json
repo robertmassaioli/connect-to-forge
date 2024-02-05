@@ -8,6 +8,10 @@
   },
   "author": "Robert Massaioli <connect-on-forge@rmdir.app>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/robertmassaioli/connect-to-forge.git"
+  },
   "files": [
     "dist/**/*",
     "README.md"
