@@ -166,12 +166,8 @@ function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectDescrip
   // Add scopes
   if(isPresent(connect.scopes) && connect.scopes.length > 0) {
     connect.scopes.forEach(scope => {
-      if (type === 'confluence' && scope.toLocaleLowerCase() === 'act_as_user') {
-        warnings.push('ACT_AS_USER scope (Offline user impersonation) is not currently supported in a Forge manifest for a Confluence App.');
-      } else {
-        const forgeScope = scope.toLowerCase().replace(/_/g, '-');
-        manifest.permissions.scopes.push(`${forgeScope}:connect-${type}`);
-      }
+      const forgeScope = scope.toLowerCase().replace(/_/g, '-');
+      manifest.permissions.scopes.push(`${forgeScope}:connect-${type}`);
     });
     console.log(` - Converted ${connect.scopes.length} connect scopes into correct format in manifest.`);
   }
