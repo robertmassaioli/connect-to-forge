@@ -48,31 +48,7 @@ program
 
 const { url, type, output } = program.opts();
 
-const UNSUPPORTED_MODULES = new Set([
-  "automationActions",
-  "jiraBuildInfoProvider",
-  "jiraDeploymentInfoProvider",
-  "jiraDevelopmentTool",
-  "jiraFeatureFlagInfoProvider",
-  "jiraRemoteLinkInfoProvider",
-  "jiraSecurityInfoProvider",
-  "serviceDeskOrganizationActions",
-  "serviceDeskOrganizationPanels",
-  "serviceDeskPortalFooters",
-  "serviceDeskPortalHeaders",
-  "serviceDeskPortalProfileActions",
-  "serviceDeskPortalProfilePanels",
-  "serviceDeskPortalRequestCreatePropertyPanels",
-  "serviceDeskPortalRequestViewActions",
-  "serviceDeskPortalRequestViewDetailsPanels",
-  "serviceDeskPortalRequestViewPanels",
-  "serviceDeskPortalSubHeaders",
-  "serviceDeskPortalUserMenuActions",
-  "serviceDeskQueueGroups",
-  "serviceDeskQueues",
-  "serviceDeskReportGroups",
-  "serviceDeskReports"
-]);
+const UNSUPPORTED_MODULES = new Set([]);
 
 // Helper function to download Atlassian Connect descriptor
 async function downloadConnectDescriptor(url: string): Promise<ConnectDescriptor> {
