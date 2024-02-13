@@ -48,7 +48,7 @@ program
 
 const { url, type, output } = program.opts();
 
-const UNSUPPORTED_MODULES = new Set([]);
+const UNSUPPORTED_MODULES = new Set<string>([]);
 
 // Helper function to download Atlassian Connect descriptor
 async function downloadConnectDescriptor(url: string): Promise<ConnectDescriptor> {
