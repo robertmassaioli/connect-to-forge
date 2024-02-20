@@ -18,6 +18,7 @@ interface ConnectDescriptor {
   translations?: object;
   regionBaseUrls?: object;
   cloudAppMigration?: object;
+  enableLicensing?: boolean;
 }
 
 // Typings for Forge manifest
@@ -28,6 +29,9 @@ interface ForgeManifest {
       key: string;
       authentication?: string;
       remote: string;
+    };
+    licensing?: {
+      enabled: boolean
     };
   };
   remotes: { key: string; baseUrl: string }[];
@@ -110,6 +114,11 @@ function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectDescrip
     manifest.connectModules[moduleName] = [{ key: 'lifecycle-events', ...connect.lifecycle }];
     console.log(` - Moved all lifecycle events into connectModules.${moduleName}.`);
     manifest.app.connect.authentication = 'jwt';
+  }
+
+  if (connect.enableLicensing) {
+    manifest.app.licensing = { enabled: true };
+    console.log(` - Enabled licensing in Manifest.`)
   }
 
   // Add modules
