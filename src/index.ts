@@ -30,6 +30,9 @@ interface ForgeManifest {
       authentication?: string;
       remote: string;
     };
+    runtime: {
+      name: string;
+    };
     licensing?: {
       enabled: boolean
     };
@@ -86,6 +89,9 @@ function genDefaultManifest(connect: ConnectDescriptor): ForgeManifest {
       connect: {
         key: connect.key,
         remote: 'connect'
+      },
+      runtime: {
+        name: 'nodejs18.x'
       }
     },
     remotes: [
