@@ -15,7 +15,7 @@ interface ConnectDescriptor {
   scopes: string[];
   lifecycle?: Record<string, string>;
   modules: Record<string, any>;
-  translations?: object;
+  translations?: Record<string, any>;
   regionBaseUrls?: object;
   cloudAppMigration?: object;
   enableLicensing?: boolean;
@@ -138,6 +138,16 @@ function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectDescrip
     console.log(` - Moved ${Object.keys(connect.modules).length} modules into connectModules in the manifest`);
   }
 
+  // Add translations
+  if (connect.translations?.paths && Object.entries(connect.translations.paths).length > 0) {
+    const moduleName = `${type}:translations`;
+    manifest.connectModules[moduleName] = [{
+      paths: connect.translations.paths,
+      key: moduleName,
+    }];
+    console.log(` - Moved translations into connectModules.${moduleName}.`);
+  }
+
   // Check for unsupported modules
 
 
@@ -161,11 +171,6 @@ function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectDescrip
       manifest.permissions.scopes.push(`${forgeScope}:connect-${type}`);
     });
     console.log(` - Converted ${connect.scopes.length} connect scopes into correct format in manifest.`);
-  }
-
-  // Check for translations
-  if(isPresent(connect.translations)) {
-    warnings.push(`Found 'translations' in Connect Descriptor. Translations for 'connectModules' not currently supported in Forge manifest and will not be copied over.`);
   }
 
   if(isPresent(connect.regionBaseUrls)) {
