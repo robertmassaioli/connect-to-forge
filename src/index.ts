@@ -17,7 +17,7 @@ interface ConnectDescriptor {
   modules: Record<string, any>;
   translations?: Record<string, any>;
   regionBaseUrls?: object;
-  cloudAppMigration?: object;
+  cloudAppMigration?: Record<string, string>;
   enableLicensing?: boolean;
 }
 
@@ -148,6 +148,16 @@ function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectDescrip
     console.log(` - Moved translations into connectModules.${moduleName}.`);
   }
 
+  // Copy cloud app migration webhook, if present
+  if (connect.cloudAppMigration?.migrationWebhookPath) {
+    const moduleName = `${type}:cloudAppMigration`;
+    manifest.connectModules[moduleName] = [{
+      migrationWebhookPath: connect.cloudAppMigration.migrationWebhookPath,
+      key: 'app-migration',
+    }];
+    console.log(` - Moved app migration webhook into connectModules.${moduleName}`);
+  }
+
   // Check for unsupported modules
 
 
@@ -175,10 +185,6 @@ function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectDescrip
 
   if(isPresent(connect.regionBaseUrls)) {
     warnings.push(`Found 'regionBaseUrls' in Connect Descriptor. Data Residency not Connect not currently supported in a Forge manifest.`);
-  }
-
-  if(isPresent(connect.cloudAppMigration)) {
-    warnings.push(`Found 'cloudAppMigration' in Connect Descriptor. App Migration Platform not currently supported in a Forge manifest.`);
   }
 
   console.log('');
