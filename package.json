@@ -1,6 +1,6 @@
 {
   "name": "connect-to-forge",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "description": "Converts an Atlassian Connect Descritor to a connect-on-forge manifest.",
   "main": "dist/index",
   "bin": {
