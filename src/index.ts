@@ -143,7 +143,7 @@ function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectDescrip
     const moduleName = `${type}:translations`;
     manifest.connectModules[moduleName] = [{
       paths: connect.translations.paths,
-      key: moduleName,
+      key: 'connect-translations',
     }];
     console.log(` - Moved translations into connectModules.${moduleName}.`);
   }
