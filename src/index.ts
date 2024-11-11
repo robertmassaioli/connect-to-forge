@@ -91,7 +91,7 @@ function genDefaultManifest(connect: ConnectDescriptor): ForgeManifest {
         remote: 'connect'
       },
       runtime: {
-        name: 'nodejs18.x'
+        name: 'nodejs20.x'
       }
     },
     remotes: [
