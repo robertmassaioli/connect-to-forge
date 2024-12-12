@@ -16,7 +16,7 @@ interface ConnectDescriptor {
   lifecycle?: Record<string, string>;
   modules: Record<string, any>;
   translations?: Record<string, any>;
-  regionBaseUrls?: object;
+  regionBaseUrls?: Record<string, any>;
   cloudAppMigration?: Record<string, string>;
   enableLicensing?: boolean;
 }
@@ -37,7 +37,14 @@ interface ForgeManifest {
       enabled: boolean
     };
   };
-  remotes: { key: string; baseUrl: string }[];
+  remotes: {
+    key: string;
+    baseUrl: string | Record<string, any>;
+    storage?: {
+      inScopeEUD: boolean;
+    };
+    operations?: string[];
+  }[];
   connectModules: Record<string, any>;
   permissions: {
     scopes: string[];
@@ -108,7 +115,7 @@ function genDefaultManifest(connect: ConnectDescriptor): ForgeManifest {
 }
 
 // Helper function to convert Atlassian Connect descriptor to Forge manifest
-function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectDescriptor, type: 'jira' | 'confluence'): [ForgeManifest, string[]] {
+async function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectDescriptor, type: 'jira' | 'confluence'): Promise<[ForgeManifest, string[]]> {
   let warnings: string[] = [];
 
   console.log(`Conversion begun for '${connect.name}':`);
@@ -183,8 +190,60 @@ function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectDescrip
     console.log(` - Converted ${connect.scopes.length} connect scopes into correct format in manifest.`);
   }
 
+  // Convert region base URLs for data residency
   if(isPresent(connect.regionBaseUrls)) {
-    warnings.push(`Found 'regionBaseUrls' in Connect Descriptor. Data Residency not Connect not currently supported in a Forge manifest.`);
+    const regionKeys = Object.keys(connect.regionBaseUrls);
+    if (regionKeys.length > 0) {
+      const regionBaseUrls: Record<string, any> = {
+        default: connect.baseUrl
+      }
+
+      regionKeys.forEach(regionKey => {
+        if (connect.regionBaseUrls) {
+          regionBaseUrls[regionKey] = connect.regionBaseUrls[regionKey];
+          console.log(" - Added region base URL for region: ", regionKey);
+        }
+      });
+
+      const answers = await inquirer.prompt<{ operations: string[] }>([
+        {
+          type: 'checkbox',
+          name: 'operations',
+          message: 'What is the purpose of the data being egressed? See https://developer.atlassian.com/platform/forge/manifest-reference/remotes/#properties for more information.',
+          choices: ['storage', 'compute', 'fetch', 'other']
+        }
+      ]);
+
+      let dareRemote;
+      if (answers.operations.length === 0) {
+        dareRemote = {
+          key: 'dare',
+          baseUrl: regionBaseUrls,
+          operations: ['storage'],
+          storage: {
+            inScopeEUD: true
+          }
+        }
+      } else {
+        const inScopeEUD = await inquirer.prompt([
+          {
+            type: 'confirm',
+            name: 'inScopeEUD',
+            message: 'Does your app egress end-user data to store it on a remote location?',
+            default: false
+          }
+        ]);
+        dareRemote = {
+          key: 'dare',
+          baseUrl: regionBaseUrls,
+          operations: answers.operations,
+          storage: {
+            inScopeEUD
+          }
+        }
+      }
+      manifest.remotes.push(dareRemote);
+    }
   }
 
   console.log('');
@@ -196,7 +255,7 @@ type ExpectedAction = 'Override' | 'Abort';
 
 async function main() {
   const connectDescriptor = await downloadConnectDescriptor(url);
-  let [forgeManifest, warnings] = convertToForgemanifest(genDefaultManifest(connectDescriptor), connectDescriptor, type as 'jira' | 'confluence');
+  let [forgeManifest, warnings] = await convertToForgemanifest(genDefaultManifest(connectDescriptor), connectDescriptor, type as 'jira' | 'confluence');
 
   const existingManifest = loadExistingManifest(output);
   if (isPresent(existingManifest)) {
