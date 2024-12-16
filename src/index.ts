@@ -216,6 +216,7 @@ async function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectD
 
       let dareRemote;
       if (answers.operations.length === 0) {
+        console.log('No operations selected, Forge will assume that the app is egressing end-user data to be stored on a remote back end.');
         dareRemote = {
           key: 'dare',
           baseUrl: regionBaseUrls,
@@ -225,7 +226,7 @@ async function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectD
           }
         }
       } else {
-        const inScopeEUD = await inquirer.prompt([
+        const { inScopeEUD } = await inquirer.prompt([
           {
             type: 'confirm',
             name: 'inScopeEUD',
