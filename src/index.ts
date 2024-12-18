@@ -214,18 +214,17 @@ async function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectD
         }
       ]);
 
-      let dareRemote;
       if (answers.operations.length === 0) {
         console.log('No operations selected, Forge will assume that the app is egressing end-user data to be stored on a remote back end.');
-        dareRemote = {
-          key: 'dare',
+        manifest.remotes[0] = {
+          key: 'connect',
           baseUrl: regionBaseUrls,
           operations: ['storage'],
           storage: {
             inScopeEUD: true
           }
         }
-      } else {
+      } else if (answers.operations.includes('storage')) {
         const { inScopeEUD } = await inquirer.prompt([
           {
             type: 'confirm',
@@ -234,16 +233,21 @@ async function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectD
             default: false
           }
         ]);
-        dareRemote = {
-          key: 'dare',
+        manifest.remotes[0] = {
+          key: 'connect',
           baseUrl: regionBaseUrls,
           operations: answers.operations,
           storage: {
             inScopeEUD
           }
         }
+      } else {
+        manifest.remotes[0] = {
+          key: 'connect',
+          baseUrl: regionBaseUrls,
+          operations: answers.operations
+          }
       }
-      manifest.remotes.push(dareRemote);
     }
   }
 
