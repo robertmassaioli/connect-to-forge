@@ -239,7 +239,7 @@ async function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectD
             type: 'confirm',
             name: 'inScopeEUD',
             message: 'Does your app egress end-user data to store it on a remote location?',
-            default: false
+            default: true
           }
         ]);
         manifest.remotes[0] = {
