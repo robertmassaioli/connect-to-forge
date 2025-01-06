@@ -19,6 +19,9 @@ interface ConnectDescriptor {
   regionBaseUrls?: Record<string, any>;
   cloudAppMigration?: Record<string, string>;
   enableLicensing?: boolean;
+  dataResidency?: {
+    maxMigrationDurationHours: number;
+  }
 }
 
 // Typings for Forge manifest
@@ -45,6 +48,7 @@ interface ForgeManifest {
     };
     operations?: string[];
   }[];
+  modules?: Record<string, any>;
   connectModules: Record<string, any>;
   permissions: {
     scopes: string[];
@@ -124,7 +128,8 @@ async function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectD
   // Add lifecycle events
   if (connect.lifecycle) {
     const moduleName = `${type}:lifecycle`;
-    manifest.connectModules[moduleName] = [{ key: 'lifecycle-events', ...connect.lifecycle }];
+    // Filter out the dare-migration lifecycle, as this will be added into the migration:dataResidency module later
+    manifest.connectModules[moduleName] = [{ key: 'lifecycle-events', ...Object.fromEntries(Object.entries(connect.lifecycle).filter(([key]) => key !== 'dare-migration'))}];
     console.log(` - Moved all lifecycle events into connectModules.${moduleName}.`);
     manifest.app.connect.authentication = 'jwt';
   }
@@ -192,6 +197,20 @@ async function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectD
 
   // Convert region base URLs for data residency
   if(isPresent(connect.regionBaseUrls)) {
+
+    if (connect.lifecycle?.['dare-migration']) {
+      manifest.modules = {
+        'migration:dataResidency': [{
+            key: 'dare',
+            remote: 'connect',
+            path: connect.lifecycle['dare-migration'],
+            maxMigrationDurationHours: connect.dataResidency?.maxMigrationDurationHours
+        }]
+      };
+    } else {
+      warnings.push('Region base URLs are present but no lifecycle hook for dare-migration event is defined.');
+    }
+
     const regionKeys = Object.keys(connect.regionBaseUrls);
     if (regionKeys.length > 0) {
       const regionBaseUrls: Record<string, any> = {
@@ -214,23 +233,13 @@ async function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectD
         }
       ]);
 
-      if (answers.operations.length === 0) {
-        console.log('No operations selected, Forge will assume that the app is egressing end-user data to be stored on a remote back end.');
-        manifest.remotes[0] = {
-          key: 'connect',
-          baseUrl: regionBaseUrls,
-          operations: ['storage'],
-          storage: {
-            inScopeEUD: true
-          }
-        }
-      } else if (answers.operations.includes('storage')) {
+      if (answers.operations.includes('storage')) {
         const { inScopeEUD } = await inquirer.prompt([
           {
             type: 'confirm',
             name: 'inScopeEUD',
             message: 'Does your app egress end-user data to store it on a remote location?',
-            default: false
+            default: true
           }
         ]);
         manifest.remotes[0] = {
@@ -242,11 +251,14 @@ async function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectD
           }
         }
       } else {
+        if (answers.operations.length === 0) {
+          console.log('No operations selected, Forge will assume that the app is egressing end-user data to be stored on a remote back end.');
+        }
         manifest.remotes[0] = {
           key: 'connect',
           baseUrl: regionBaseUrls,
-          operations: answers.operations
-          }
+          operations: answers.operations.length > 0 ? answers.operations : undefined
+        };
       }
     }
   }
