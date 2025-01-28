@@ -320,6 +320,20 @@ async function main() {
     }
   }
 
+  const { appUser } = await inquirer.prompt([
+    {
+      name: 'appUser',
+      type: 'confirm',
+      message: 'Are you using the Connect system user for anything (storing data against the app user, expecting permissions to be granted to the user)?',
+      default: false
+    }
+  ]);
+
+  if (appUser) {
+    console.warn('Before deploying your Forge app to production, please request your Connect user to be persisted. See https://developer.atlassian.com/platform/adopting-forge-from-connect/persist-app-accounts/ for instructions');
+    console.warn('');
+  }
+
   // console.log('result', JSON.stringify(forgeManifest, null ,2));
   const manifestYaml = yaml.dump(forgeManifest);
   fs.writeFileSync(output, manifestYaml);
