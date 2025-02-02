@@ -324,7 +324,7 @@ async function main() {
     {
       name: 'appUser',
       type: 'confirm',
-      message: 'Are you using the Connect system user for anything (storing data against the app user, expecting permissions to be granted to the user)?',
+      message: 'Does this app use the Connect system user for anything (storing data against the app user, defining configuration of modules such as macros and dashboard items, expecting permissions to be granted to the user)?',
       default: false
     }
   ]);
@@ -344,5 +344,5 @@ async function main() {
 }
 
 main().catch(e => {
-  console.error(`Program failed to catche error: ${error}`);
+  console.error(`Program failed to catche error: ${e}`);
 });
