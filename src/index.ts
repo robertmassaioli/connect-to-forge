@@ -118,25 +118,62 @@ function genDefaultManifest(connect: ConnectDescriptor): ForgeManifest {
   };
 }
 
+async function askForMigrationPath(
+  defaultMigrationPath: string,
+  warnings: string[]
+) {
+  const { migrationPath } = await inquirer.prompt([
+    {
+      type: "input",
+      name: "migrationPath",
+      message:
+        "JWT auth is not supported on migration endpoints. Enter the new migrations path (leave empty to use the default path same as Connect and update it later):",
+    },
+  ]);
+
+  if (!migrationPath.trim()) {
+    warnings.push(
+      "Warning: You should specify a new migration path because JWT auth is not supported on migration endpoints."
+    );
+  }
+
+  return migrationPath.trim() || defaultMigrationPath;
+}
+
 // Helper function to convert Atlassian Connect descriptor to Forge manifest
-async function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectDescriptor, type: 'jira' | 'confluence'): Promise<[ForgeManifest, string[]]> {
+async function convertToForgemanifest(
+  manifest: ForgeManifest,
+  connect: ConnectDescriptor,
+  type: "jira" | "confluence"
+): Promise<[ForgeManifest, string[]]> {
   let warnings: string[] = [];
 
   console.log(`Conversion begun for '${connect.name}':`);
-  console.log('');
+  console.log("");
 
   // Add lifecycle events
   if (connect.lifecycle) {
     const moduleName = `${type}:lifecycle`;
     // Filter out the dare-migration lifecycle, as this will be added into the migration:dataResidency module later
-    manifest.connectModules[moduleName] = [{ key: 'lifecycle-events', ...Object.fromEntries(Object.entries(connect.lifecycle).filter(([key]) => key !== 'dare-migration'))}];
-    console.log(` - Moved all lifecycle events into connectModules.${moduleName}.`);
-    manifest.app.connect.authentication = 'jwt';
+    manifest.connectModules[moduleName] = [
+      {
+        key: "lifecycle-events",
+        ...Object.fromEntries(
+          Object.entries(connect.lifecycle).filter(
+            ([key]) => key !== "dare-migration"
+          )
+        ),
+      },
+    ];
+    console.log(
+      ` - Moved all lifecycle events into connectModules.${moduleName}.`
+    );
+    manifest.app.connect.authentication = "jwt";
   }
 
   if (connect.enableLicensing) {
     manifest.app.licensing = { enabled: true };
-    console.log(` - Enabled licensing in Manifest.`)
+    console.log(` - Enabled licensing in Manifest.`);
   }
 
   // Add modules
@@ -144,80 +181,115 @@ async function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectD
     for (const [moduleType, moduleContent] of Object.entries(connect.modules)) {
       if (isPresent(moduleContent)) {
         // There are no singleton modules in a Forge manifest, so anything that is not an array needs to be turned into one.
-        manifest.connectModules[`${type}:${moduleType}`] = Array.isArray(moduleContent) ? moduleContent : [moduleContent];
+        manifest.connectModules[`${type}:${moduleType}`] = Array.isArray(
+          moduleContent
+        )
+          ? moduleContent
+          : [moduleContent];
       }
     }
-    console.log(` - Moved ${Object.keys(connect.modules).length} modules into connectModules in the manifest`);
+    console.log(
+      ` - Moved ${
+        Object.keys(connect.modules).length
+      } modules into connectModules in the manifest`
+    );
   }
 
   // Add translations
-  if (connect.translations?.paths && Object.entries(connect.translations.paths).length > 0) {
+  if (
+    connect.translations?.paths &&
+    Object.entries(connect.translations.paths).length > 0
+  ) {
     const moduleName = `${type}:translations`;
-    manifest.connectModules[moduleName] = [{
-      paths: connect.translations.paths,
-      key: 'connect-translations',
-    }];
+    manifest.connectModules[moduleName] = [
+      {
+        paths: connect.translations.paths,
+        key: "connect-translations",
+      },
+    ];
     console.log(` - Moved translations into connectModules.${moduleName}.`);
   }
 
   // Copy cloud app migration webhook, if present
   if (connect.cloudAppMigration?.migrationWebhookPath) {
     const moduleName = `${type}:cloudAppMigration`;
-    manifest.connectModules[moduleName] = [{
-      migrationWebhookPath: connect.cloudAppMigration.migrationWebhookPath,
-      key: 'app-migration',
-    }];
-    console.log(` - Moved app migration webhook into connectModules.${moduleName}`);
+    manifest.connectModules[moduleName] = [
+      {
+        migrationWebhookPath: connect.cloudAppMigration.migrationWebhookPath,
+        key: "app-migration",
+      },
+    ];
+    console.log(
+      ` - Moved app migration webhook into connectModules.${moduleName}`
+    );
   }
 
   // Check for unsupported modules
 
-
-  const foundUnsupportedModules = Object.keys(connect.modules).filter(module => UNSUPPORTED_MODULES.has(module));
-  warnings.push(...foundUnsupportedModules.map(unsupportedModule => `${unsupportedModule} is not currently supported in a Forge manifest.`))
-
+  const foundUnsupportedModules = Object.keys(connect.modules).filter(
+    (module) => UNSUPPORTED_MODULES.has(module)
+  );
+  warnings.push(
+    ...foundUnsupportedModules.map(
+      (unsupportedModule) =>
+        `${unsupportedModule} is not currently supported in a Forge manifest.`
+    )
+  );
 
   // Add webhooks with keys
   const webhooks = connect.modules.webhooks;
   if (webhooks && Array.isArray(webhooks)) {
     webhooks.forEach((webhook, index) => {
-      manifest.connectModules[`${type}:webhooks`][index].key = `webhook-${index + 1}`;
+      manifest.connectModules[`${type}:webhooks`][index].key = `webhook-${
+        index + 1
+      }`;
     });
-    console.log(` - Ensured all webhooks have automatically generated keys.`)
+    console.log(` - Ensured all webhooks have automatically generated keys.`);
   }
 
   // Add scopes
-  if(isPresent(connect.scopes) && connect.scopes.length > 0) {
-    connect.scopes.forEach(scope => {
-      const forgeScope = scope.toLowerCase().replace(/_/g, '-');
+  if (isPresent(connect.scopes) && connect.scopes.length > 0) {
+    connect.scopes.forEach((scope) => {
+      const forgeScope = scope.toLowerCase().replace(/_/g, "-");
       manifest.permissions.scopes.push(`${forgeScope}:connect-${type}`);
     });
-    console.log(` - Converted ${connect.scopes.length} connect scopes into correct format in manifest.`);
+    console.log(
+      ` - Converted ${connect.scopes.length} connect scopes into correct format in manifest.`
+    );
   }
 
   // Convert region base URLs for data residency
-  if(isPresent(connect.regionBaseUrls)) {
-
-    if (connect.lifecycle?.['dare-migration']) {
+  if (isPresent(connect.regionBaseUrls)) {
+    if (connect.lifecycle?.["dare-migration"]) {
+      const defaultMigrationPath = connect.lifecycle["dare-migration"];
+      const migrationPath = await askForMigrationPath(
+        defaultMigrationPath,
+        warnings
+      );
       manifest.modules = {
-        'migration:dataResidency': [{
-            key: 'dare',
-            remote: 'connect',
-            path: connect.lifecycle['dare-migration'],
-            maxMigrationDurationHours: connect.dataResidency?.maxMigrationDurationHours
-        }]
+        "migration:dataResidency": [
+          {
+            key: "dare",
+            remote: "connect",
+            path: migrationPath,
+            maxMigrationDurationHours:
+              connect.dataResidency?.maxMigrationDurationHours,
+          },
+        ],
       };
     } else {
-      warnings.push('Region base URLs are present but no lifecycle hook for dare-migration event is defined.');
+      warnings.push(
+        "Region base URLs are present but no lifecycle hook for dare-migration event is defined."
+      );
     }
 
     const regionKeys = Object.keys(connect.regionBaseUrls);
     if (regionKeys.length > 0) {
       const regionBaseUrls: Record<string, any> = {
-        default: connect.baseUrl
-      }
+        default: connect.baseUrl,
+      };
 
-      regionKeys.forEach(regionKey => {
+      regionKeys.forEach((regionKey) => {
         if (connect.regionBaseUrls) {
           regionBaseUrls[regionKey] = connect.regionBaseUrls[regionKey];
           console.log(" - Added region base URL for region: ", regionKey);
@@ -226,44 +298,49 @@ async function convertToForgemanifest(manifest: ForgeManifest, connect: ConnectD
 
       const answers = await inquirer.prompt<{ operations: string[] }>([
         {
-          type: 'checkbox',
-          name: 'operations',
-          message: 'What is the purpose of the data being egressed? See https://developer.atlassian.com/platform/forge/manifest-reference/remotes/#properties for more information.',
-          choices: ['storage', 'compute', 'fetch', 'other']
-        }
+          type: "checkbox",
+          name: "operations",
+          message:
+            "What is the purpose of the data being egressed? See https://developer.atlassian.com/platform/forge/manifest-reference/remotes/#properties for more information.",
+          choices: ["storage", "compute", "fetch", "other"],
+        },
       ]);
 
-      if (answers.operations.includes('storage')) {
+      if (answers.operations.includes("storage")) {
         const { inScopeEUD } = await inquirer.prompt([
           {
-            type: 'confirm',
-            name: 'inScopeEUD',
-            message: 'Does your app egress end-user data to store it on a remote location?',
-            default: true
-          }
+            type: "confirm",
+            name: "inScopeEUD",
+            message:
+              "Does your app egress end-user data to store it on a remote location?",
+            default: true,
+          },
         ]);
         manifest.remotes[0] = {
-          key: 'connect',
+          key: "connect",
           baseUrl: regionBaseUrls,
           operations: answers.operations,
           storage: {
-            inScopeEUD
-          }
-        }
+            inScopeEUD,
+          },
+        };
       } else {
         if (answers.operations.length === 0) {
-          console.log('No operations selected, Forge will assume that the app is egressing end-user data to be stored on a remote back end.');
+          console.log(
+            "No operations selected, Forge will assume that the app is egressing end-user data to be stored on a remote back end."
+          );
         }
         manifest.remotes[0] = {
-          key: 'connect',
+          key: "connect",
           baseUrl: regionBaseUrls,
-          operations: answers.operations.length > 0 ? answers.operations : undefined
+          operations:
+            answers.operations.length > 0 ? answers.operations : undefined,
         };
       }
     }
   }
 
-  console.log('');
+  console.log("");
 
   return [manifest, warnings];
 }
