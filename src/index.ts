@@ -397,6 +397,20 @@ async function main() {
     }
   }
 
+  const { appUser } = await inquirer.prompt([
+    {
+      name: 'appUser',
+      type: 'confirm',
+      message: 'Does this app use the Connect system user for anything (storing data against the app user, defining configuration of modules such as macros and dashboard items, expecting permissions to be granted to the user)?',
+      default: false
+    }
+  ]);
+
+  if (appUser) {
+    console.warn('Before deploying your Forge app to production, please request your Connect user to be persisted. See https://developer.atlassian.com/platform/adopting-forge-from-connect/persist-app-accounts/ for instructions');
+    console.warn('');
+  }
+
   // console.log('result', JSON.stringify(forgeManifest, null ,2));
   const manifestYaml = yaml.dump(forgeManifest);
   fs.writeFileSync(output, manifestYaml);
@@ -407,5 +421,5 @@ async function main() {
 }
 
 main().catch(e => {
-  console.error(`Program failed to catche error: ${error}`);
+  console.error(`Program failed to catche error: ${e}`);
 });
