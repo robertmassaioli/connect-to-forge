@@ -19,6 +19,7 @@ interface ConnectDescriptor {
   regionBaseUrls?: Record<string, any>;
   cloudAppMigration?: Record<string, string>;
   enableLicensing?: boolean;
+  editionsEnabled?: boolean;
   dataResidency?: {
     maxMigrationDurationHours: number;
   }
@@ -37,7 +38,8 @@ interface ForgeManifest {
       name: string;
     };
     licensing?: {
-      enabled: boolean
+      enabled: boolean;
+      editionsEnabled?: boolean;
     };
   };
   remotes: {
@@ -171,9 +173,17 @@ async function convertToForgemanifest(
     manifest.app.connect.authentication = "jwt";
   }
 
-  if (connect.enableLicensing) {
-    manifest.app.licensing = { enabled: true };
+  if (connect.enableLicensing !== undefined) {
+    manifest.app.licensing = { enabled: connect.enableLicensing };
     console.log(` - Enabled licensing in Manifest.`);
+  }
+
+  if (connect.editionsEnabled) {
+    if (manifest.app.licensing === undefined) {
+      manifest.app.licensing = { enabled: true };
+    }
+    manifest.app.licensing.editionsEnabled = true;
+    console.log(` - Enabled editions in manifest.`);
   }
 
   // Add modules
