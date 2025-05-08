@@ -186,6 +186,44 @@ async function convertToForgemanifest(
     console.log(` - Enabled editions in manifest.`);
   }
 
+  // Handle permission modules migration if this is a Jira app
+  if (type === "jira") {
+    // Initialize modules section if not already present
+    if (!manifest.modules) {
+      manifest.modules = {};
+    }
+
+    // Helper to flatten 'name' and 'description' from { value: "..." } → "..."
+    function normalizePermission(permission: any): any {
+      return {
+        ...permission,
+        name: typeof permission.name === 'object' ? permission.name.value : permission.name,
+        description: typeof permission.description === 'object' ? permission.description.value : permission.description,
+        migratedFromConnect: true,
+      };
+    }
+
+    // Process jiraGlobalPermissions if present
+    if (connect.modules.jiraGlobalPermissions && Array.isArray(connect.modules.jiraGlobalPermissions)) {
+      manifest.modules["jira:globalPermission"] = connect.modules.jiraGlobalPermissions.map(normalizePermission);
+
+      console.log(` - Migrated ${connect.modules.jiraGlobalPermissions.length} jiraGlobalPermissions to Forge modules.jira:globalPermission`);
+
+      // Remove from connectModules to prevent duplication
+      delete connect.modules.jiraGlobalPermissions;
+    }
+
+    // Process jiraProjectPermissions if present
+    if (connect.modules.jiraProjectPermissions && Array.isArray(connect.modules.jiraProjectPermissions)) {
+      manifest.modules["jira:projectPermission"] = connect.modules.jiraProjectPermissions.map(normalizePermission);
+
+      console.log(` - Migrated ${connect.modules.jiraProjectPermissions.length} jiraProjectPermissions to Forge modules.jira:projectPermission`);
+
+      // Remove from connectModules to prevent duplication
+      delete connect.modules.jiraProjectPermissions;
+    }
+  }
+
   // Add modules
   if (connect.modules) {
     for (const [moduleType, moduleContent] of Object.entries(connect.modules)) {
