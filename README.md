@@ -1,3 +1,7 @@
+## Note
+
+This repository has been replaced with a fork at [https://github.com/atlassian-forks/connect-to-forge](https://github.com/atlassian-forks/connect-to-forge).
+
 ## connect-to-forge
 
 This tool is designed to let Connect developers quickly migrate their apps to Forge, starting with the Descriptor to Manifest conversion. To use this tool, simply:
